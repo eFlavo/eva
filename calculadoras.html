@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVA - Soluciones Integrales</title>
+    <title>Temario Diseño de Redes FTTH-GPON - EVA</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -11,1598 +11,686 @@
     <!-- Iconos Phosphor -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    <!-- LEAFLET MAPS (CSS) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-
-    <!-- SCRIPT DE LEAFLET PARA EL MAPA -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
     <style>
         /* --- BRANDING EVA DARK THEME --- */
         :root {
-            --bg-main: #100F1D;      /* Azul Profundo Base */
-            --bg-deep: #0A0912;      /* Contraste Oscuro */
-            --bg-card: #161521;      /* Tarjetas/Paneles */
-            --bg-sidebar: #0e0d19;   /* Sidebar */
-            --accent: #FCBF26;       /* Amarillo Dorado */
+            --bg-main: #100F1D;
+            --bg-deep: #0A0912;
+            --bg-card: #1A1B29;
+            --accent: #FCBF26;
             --text-main: #F3F4F6;
-            --text-muted: #E5E7EB;   /* CAMBIO: Texto mucho más claro para menú */
+            --text-muted: #D1D5DB;
         }
         
         body { 
             font-family: 'Open Sans', sans-serif; 
-            background-color: var(--bg-deep); 
+            background-color: var(--bg-main); 
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(252, 191, 38, 0.03) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.02) 0%, transparent 25%);
             color: var(--text-main);
-            overflow: hidden; /* El scroll lo manejarán los paneles */
-            height: 100vh;
+            overflow-x: hidden;
         }
-        
         h1, h2, h3, h4, .font-heading { font-family: 'Montserrat', sans-serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Inputs Numéricos (Sin flechas) */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-
-        /* --- BACKGROUND CANVAS --- */
-        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; pointer-events: none; }
-
-        /* --- LAYOUT DASHBOARD --- */
-        .app-container {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            height: 100vh;
-            width: 100%;
+        /* Estilos de Tarjetas */
+        .course-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .course-card:hover {
+            border-color: rgba(252, 191, 38, 0.4);
+            background: #202130;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            transform: translateY(-3px);
         }
 
-        /* SIDEBAR */
-        .sidebar {
-            background: rgba(16, 15, 29, 0.95);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        /* ICONO DECORATIVO GRANDE */
+        .section-icon-bg {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 9rem; 
+            color: rgba(252, 191, 38, 0.08); 
+            transform: rotate(10deg);
+            pointer-events: none;
+            transition: all 0.5s ease;
+            filter: drop-shadow(0 0 10px rgba(252,191,38,0.1));
+            z-index: 0;
+        }
+        
+        @keyframes floatIcon {
+            0% { transform: translateY(0) rotate(10deg); }
+            50% { transform: translateY(-5px) rotate(12deg); }
+            100% { transform: translateY(0) rotate(10deg); }
+        }
+        
+        .section-icon-bg {
+            animation: floatIcon 6s ease-in-out infinite;
+        }
+
+        .course-card:hover .section-icon-bg {
+            color: rgba(252, 191, 38, 0.15);
+            transform: scale(1.1) rotate(5deg);
+            filter: drop-shadow(0 0 15px rgba(252,191,38,0.3));
+        }
+
+        /* Títulos de Módulos */
+        .module-header {
             display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            z-index: 50;
+            align-items: flex-start;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 1rem;
+            position: relative;
+            z-index: 10;
+        }
+        .module-number {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: transparent;
+            -webkit-text-stroke: 1px var(--accent);
+            line-height: 0.8;
+            opacity: 0.8;
+        }
+        .module-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            line-height: 1.1;
+            padding-top: 5px;
         }
 
-        .menu-item {
+        /* Listas Simples */
+        .tech-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            z-index: 10;
+        }
+        .tech-list li {
+            position: relative;
+            padding-left: 1.2rem;
+            margin-bottom: 0.6rem;
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+        .tech-list li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent);
+            border-radius: 1px;
+            opacity: 0.9;
+        }
+        
+        .tech-list ul ul {
+            margin-top: 0.4rem;
+            margin-left: 0.5rem;
+            padding-left: 1rem;
+            border-left: 1px solid rgba(255,255,255,0.15);
+        }
+        .tech-list ul ul li {
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+        }
+        .tech-list ul ul li::before {
+            background-color: rgba(255,255,255,0.5);
+            width: 4px;
+            height: 4px;
+            top: 9px;
+        }
+
+        /* Highlight sutil */
+        .hl {
+            color: var(--accent);
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            background: rgba(252, 191, 38, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Botón de Volver */
+        .back-btn {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 50;
+            background: rgba(16, 15, 29, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 14px 16px; /* Aumentado padding */
-            margin-bottom: 8px;
-            border-radius: 8px;
-            color: rgba(255, 255, 255, 0.7); /* Texto base más visible */
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 1px solid transparent;
-            font-weight: 600; /* Texto más grueso */
-            font-size: 0.95rem; /* Texto un poco más grande */
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s;
         }
+        .back-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateX(-5px); }
 
-        .menu-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2); /* Sombra al hover */
+        /* --- RESPONSIVE ADJUSTMENTS --- */
+        @media (max-width: 768px) {
+            .course-card {
+                padding: 1.5rem;
+            }
+            .module-number {
+                font-size: 2.5rem;
+            }
+            .module-title {
+                font-size: 1.3rem;
+            }
+            .section-icon-bg {
+                font-size: 6rem;
+                top: -5px;
+                right: -5px;
+            }
+            .back-btn {
+                top: 1rem;
+                left: 1rem;
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            h1 {
+                font-size: 2.25rem !important; /* Ajuste para títulos muy largos */
+            }
         }
-
-        .menu-item.active {
-            background: rgba(252, 191, 38, 0.15);
-            color: var(--accent);
-            border-color: rgba(252, 191, 38, 0.4);
-            font-weight: 800; /* Extra bold activo */
-            box-shadow: 0 0 15px rgba(252, 191, 38, 0.1);
-        }
-
-        .menu-item i { font-size: 1.4rem; } /* Iconos más grandes */
-
-        /* MAIN CONTENT AREA */
-        .main-content {
-            position: relative;
-            overflow-y: auto;
-            padding: 2rem;
-            background: radial-gradient(circle at top right, rgba(252, 191, 38, 0.03), transparent 40%);
-            scroll-behavior: smooth;
-        }
-
-        /* PANELES (Views) - CORRECCIÓN CRÍTICA DE VISIBILIDAD */
-        .view-panel {
-            display: none !important; /* Forzar oculto por defecto */
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding-bottom: 100px;
-        }
-
-        .view-panel.active-view {
-            display: block !important; /* Forzar visible cuando activo */
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Regla específica para que el Inicio use FLEX solo cuando está activo */
-        #view-home.active-view {
-            display: flex !important;
-            flex-direction: column;
-        }
-
-        /* WIZARD TRANSITIONS */
-        .wizard-step {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
-        .wizard-step.active-step {
-            display: block;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* CUSTOM SCROLLBAR */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        /* BLINK ANIMATION FOR PERU TAG */
-        @keyframes border-pulse {
-            0% { border-color: rgba(239, 68, 68, 0.2); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-            50% { border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 0 10px 0 rgba(239, 68, 68, 0.2); }
-            100% { border-color: rgba(239, 68, 68, 0.2); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-        .tag-peru {
-            animation: border-pulse 2s infinite;
-        }
-
-        /* RADIO CARDS */
-        .radio-card-input:checked + .radio-card {
-            border-color: var(--accent);
-            background-color: rgba(252, 191, 38, 0.05);
-            box-shadow: 0 0 20px rgba(252, 191, 38, 0.1);
-        }
-        .radio-card-input:checked + .radio-card .check-icon {
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        /* Map Styles */
-        .map-wrapper { transition: height 0.3s ease; }
     </style>
 </head>
-<body class="antialiased">
+<body class="pt-24 pb-20">
 
-    <!-- FONDO ANIMADO -->
-    <canvas id="bg-canvas"></canvas>
+    <!-- Botón Flotante para volver -->
+    <a href="principal.html" class="back-btn" title="Volver al inicio">
+        <i class="ph-bold ph-arrow-left"></i>
+    </a>
 
-    <div class="app-container">
-        <!-- SIDEBAR (Desktop) -->
-        <aside class="sidebar hidden md:flex">
-            <!-- LOGO: SOLO IMAGEN -->
-            <div class="mb-10 flex items-center gap-3 px-2">
-                <img src="img\LOGO_eva.png" alt="EVA" class="h-12 w-auto object-contain">
-            </div>
-
-            <nav class="flex-1 space-y-2 nav-list w-full">
-                <!-- BOTÓN INICIO -->
-                <div id="nav-home" class="menu-item active" onclick="switchView('view-home', this)">
-                    <i class="ph-bold ph-house"></i>
-                    <span class="menu-text">Inicio</span>
-                </div>
-
-                <div class="text-[10px] text-white font-black uppercase tracking-widest px-4 mb-3 mt-8 border-b border-white/10 pb-2 opacity-80">Calculadoras</div>
-                
-                <div id="nav-diseno" class="menu-item" onclick="switchView('view-diseno', this)">
-                    <i class="ph-bold ph-pencil-ruler"></i>
-                    <span class="menu-text">Diseño Red GPON</span>
-                </div>
-
-                <div id="nav-exp" class="menu-item" onclick="switchView('view-expediente', this)">
-                    <i class="ph-bold ph-file-text"></i>
-                    <span class="menu-text">Expedientes</span>
-                </div>
-
-                <div id="nav-imp" class="menu-item" onclick="switchView('view-implementacion', this)">
-                    <i class="ph-bold ph-wrench"></i>
-                    <span class="menu-text">Implementación</span>
-                </div>
-
-                <div id="nav-act" class="menu-item" onclick="switchView('view-actualizacion', this)">
-                    <i class="ph-bold ph-arrows-clockwise"></i>
-                    <span class="menu-text">Actualización</span>
-                </div>
-            </nav>
-
-            <div class="mt-auto border-t border-white/5 pt-6 px-2">
-                <a href="index.html" class="flex items-center gap-3 text-gray-300 hover:text-white transition-colors group">
-                    <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-                    <span class="sidebar-footer-text text-xs font-bold uppercase tracking-wide">Volver al Inicio</span>
-                </a>
-            </div>
-        </aside>
-
-        <!-- HEADER MOBILE -->
-        <div class="md:hidden sidebar flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <img src="img\LOGO_eva.png" alt="EVA" class="h-8 w-auto object-contain">
-                <span class="font-heading font-bold text-white text-lg tracking-widest">EVA TOOLS</span>
-            </div>
-            <a href="index.html" class="text-white/50 hover:text-white"><i class="ph-bold ph-x text-xl"></i></a>
-        </div>
-
-        <!-- MOBILE NAV BOTTOM -->
-        <div class="md:hidden mobile-nav">
-            <div id="mob-nav-home" class="mobile-nav-item active" onclick="switchView('view-home', this, true)">
-                <i class="ph-bold ph-house"></i><span>Inicio</span>
-            </div>
-            <div id="mob-nav-diseno" class="mobile-nav-item" onclick="switchView('view-diseno', this, true)">
-                <i class="ph-bold ph-pencil-ruler"></i><span>Diseño</span>
-            </div>
-            <div id="mob-nav-exp" class="mobile-nav-item" onclick="switchView('view-expediente', this, true)">
-                <i class="ph-bold ph-file-text"></i><span>Exp.</span>
-            </div>
-            <div id="mob-nav-imp" class="mobile-nav-item" onclick="switchView('view-implementacion', this, true)">
-                <i class="ph-bold ph-wrench"></i><span>Impl.</span>
-            </div>
-            <div id="mob-nav-act" class="mobile-nav-item" onclick="switchView('view-actualizacion', this, true)">
-                <i class="ph-bold ph-arrows-clockwise"></i><span>Act.</span>
-            </div>
-        </div>
-
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
+    <!-- HEADER / HERO DEL CURSO -->
+    <header class="container mx-auto px-4 md:px-6 mb-16 relative">
+        <div class="flex flex-col lg:flex-row justify-between items-start border-b border-white/10 pb-8 gap-8">
             
-            <!-- VIEW 0: INICIO (HOME) -->
-            <!-- CORRECCIÓN: Se eliminaron las clases 'flex flex-col' del HTML para evitar conflictos. Se aplican por CSS ID -->
-            <div id="view-home" class="view-panel active-view h-full items-center justify-center relative overflow-hidden" style="min-height: 80vh;">
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div class="w-[600px] h-[600px] bg-[#FCBF26]/5 rounded-full blur-[120px]"></div>
-                </div>
+            <!-- IZQUIERDA: TÍTULO + FECHA -->
+            <div class="max-w-3xl">
+                <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-sm mb-4 block">Temario Especializado</span>
+                <h1 class="text-4xl md:text-6xl font-black text-white leading-tight uppercase mb-4">
+                    Diseño de Redes <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FCBF26] to-[#F59E0B]">FTTH-GPON</span>
+                </h1>
                 
-                <div class="relative z-10 text-center px-4 max-w-3xl mx-auto">
-                    <h1 class="text-7xl md:text-9xl font-heading font-black text-white tracking-tighter mb-2 select-none drop-shadow-2xl">
-                        EVA
-                    </h1>
-                    <p class="text-gray-400 text-sm md:text-base font-medium uppercase tracking-[0.3em] mb-8">
-                        Soluciones Integrales
+                <!-- NUEVO: FECHA DE INICIO DESTACADA -->
+                <div class="inline-flex items-center gap-2 bg-[#FCBF26]/10 border border-[#FCBF26]/30 px-4 py-2 rounded-full max-w-full">
+                    <i class="ph-fill ph-calendar-check text-[#FCBF26] flex-shrink-0"></i>
+                    <span class="text-white font-bold tracking-wide uppercase text-sm whitespace-normal">Inicio: 19 de Enero</span>
+                </div>
+            </div>
+
+            <!-- DERECHA: LOGO Y CERTIFICACIÓN -->
+            <div class="flex flex-col items-start lg:items-end gap-4 lg:pt-4 w-full lg:w-auto">
+                <!-- Logo -->
+                <img src="img\LOGO_eva.png" alt="Logo EVA" class="h-20 md:h-24 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <span class="hidden text-white font-bold text-3xl font-heading">EVA</span>
+                
+                <!-- Badge Certificación -->
+                <div class="inline-flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-5 py-3 mt-2 w-full lg:w-auto justify-start lg:justify-end">
+                    <i class="ph-fill ph-certificate text-[#FCBF26] text-2xl flex-shrink-0"></i>
+                    <p class="text-gray-200 text-sm font-medium tracking-wide text-left lg:text-right">
+                        Certificado a nombre de la nación<br>
+                        <strong class="text-white text-base">MINEDU (Perú)</strong>
                     </p>
-                    
-                    <div class="bg-[#161521]/50 backdrop-blur-sm border border-white/5 rounded-2xl p-8 mb-10 shadow-2xl">
-                        <p class="text-gray-300 text-sm md:text-base leading-relaxed mb-6">
-                            Aquí encontrarás las calculadoras para presupuestar tu proyecto. Recuerda que son 
-                            <strong class="text-[#FCBF26]">cálculos referenciales</strong>. Para una cotización final, es recomendable contactar con un asesor de la empresa.
-                        </p>
-                        
-                        <a href="https://wa.me/51978649801" target="_blank" class="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase tracking-widest text-xs rounded-xl transition-all shadow-[0_4px_20px_rgba(37,211,102,0.2)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.4)] transform hover:-translate-y-1">
-                            <i class="ph-bold ph-whatsapp-logo text-xl"></i> Contactar con un Asesor
-                        </a>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container mx-auto px-4 md:px-6 max-w-6xl">
+
+        <!-- INTRODUCCIÓN PERSUASIVA -->
+        <div class="bg-gradient-to-r from-[#1A1B29] to-[#151621] border-l-4 border-[#FCBF26] p-6 md:p-8 rounded-r-xl mb-16 shadow-2xl relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                <i class="ph-fill ph-student text-9xl text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-4 uppercase tracking-wide">Especialización Técnica para Profesionales</h3>
+            <p class="text-gray-300 leading-relaxed text-lg relative z-10">
+                Este programa está dirigido a <strong class="text-white">Estudiantes, ISPs, Ingenieros de Telecomunicaciones, Técnicos de campo</strong> y profesionales afines que deseen dominar el diseño de redes FTTH. Se requiere contar con conocimientos básicos de telecomunicaciones. Aprenderás paso a paso, desde los fundamentos físicos hasta la entrega de planos profesionales. Ya sea que busques <strong class="text-[#FCBF26]">optimizar tu propio ISP</strong> o trabajar en el área de diseño de grandes operadoras, aquí adquirirás las habilidades prácticas que el mercado exige hoy.
+            </p>
+        </div>
+
+        <!-- SOFTWARE STRIP -->
+        <div class="mb-20">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="h-[1px] bg-white/10 flex-grow"></div>
+                <span class="text-xs font-mono text-gray-400 uppercase tracking-widest text-center">Herramientas Profesionales</span>
+                <div class="h-[1px] bg-white/10 flex-grow"></div>
+            </div>
+
+            <div class="text-center mb-10">
+                <p class="text-gray-200 text-lg font-medium px-2">
+                    Aprenderemos a usar estas 3 herramientas en <span class="text-[#FCBF26] font-bold">sinergia</span> para crear un diseño profesional.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Google Earth -->
+                <div class="course-card flex items-center gap-6 group hover:-translate-y-2 !py-6 !px-6">
+                    <div class="w-14 h-14 rounded-xl bg-[#FCBF26]/10 flex items-center justify-center text-[#FCBF26] text-3xl group-hover:bg-[#FCBF26] group-hover:text-black transition-all shadow-[0_0_15px_rgba(252,191,38,0.1)] flex-shrink-0">
+                        <i class="ph-fill ph-globe-hemisphere-west"></i>
                     </div>
-                    
-                    <!-- CAMBIO: Texto AÚN MÁS resaltado -->
-                    <div class="flex flex-col md:flex-row items-center justify-center gap-3 text-[#FCBF26] animate-pulse mt-8 bg-[#FCBF26]/10 px-8 py-4 rounded-xl border border-[#FCBF26]/30 shadow-[0_0_20px_rgba(252,191,38,0.1)]">
-                        <i class="ph-bold ph-arrow-left hidden md:block text-2xl"></i>
-                        <span class="font-black text-base md:text-lg tracking-widest uppercase">Seleccione una herramienta del menú para comenzar</span>
-                        <i class="ph-bold ph-arrow-down md:hidden text-2xl"></i>
+                    <div>
+                        <h4 class="font-bold text-white uppercase text-sm mb-1">Google Earth</h4>
+                        <p class="text-xs text-gray-400 font-mono tracking-wide">Diseño Base</p>
+                    </div>
+                </div>
+                <!-- ArcGIS -->
+                <div class="course-card flex items-center gap-6 group hover:-translate-y-2 !py-6 !px-6">
+                    <div class="w-14 h-14 rounded-xl bg-[#FCBF26]/10 flex items-center justify-center text-[#FCBF26] text-3xl group-hover:bg-[#FCBF26] group-hover:text-black transition-all shadow-[0_0_15px_rgba(252,191,38,0.1)] flex-shrink-0">
+                        <i class="ph-fill ph-map-trifold"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white uppercase text-sm mb-1">ArcGIS</h4>
+                        <p class="text-xs text-gray-400 font-mono tracking-wide">Cálculo Optimizado</p>
+                    </div>
+                </div>
+                <!-- AutoCAD -->
+                <div class="course-card flex items-center gap-6 group hover:-translate-y-2 !py-6 !px-6">
+                    <div class="w-14 h-14 rounded-xl bg-[#FCBF26]/10 flex items-center justify-center text-[#FCBF26] text-3xl group-hover:bg-[#FCBF26] group-hover:text-black transition-all shadow-[0_0_15px_rgba(252,191,38,0.1)] flex-shrink-0">
+                        <i class="ph-fill ph-pencil-ruler"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white uppercase text-sm mb-1">AutoCAD</h4>
+                        <p class="text-xs text-gray-400 font-mono tracking-wide">Topología Precisa</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULOS DEL CURSO -->
+        <div class="space-y-12">
+            
+            <!-- MÓDULO 01 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-lightbulb section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">01</span>
+                    <h2 class="module-title">Introducción a las redes FTTH</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Entiende la física de la luz y los componentes esenciales sin tecnicismos complejos. Esta es la base sólida que necesitas para evitar errores costosos en la instalación y selección de materiales.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Conceptos Básicos</h4>
+                        <ul>
+                            <li>Ancho de banda</li>
+                            <li>Seguridad</li>
+                            <li>Atenuación</li>
+                            <li>Velocidad de transmisión</li>
+                            <li>Distancias de enlace</li>
+                            <li>Principios ópticos: Refracción y reflexión</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Componentes</h4>
+                        <ul>
+                            <li>Tipos de fibra:
+                                <ul><li>Monomodo</li><li>Multimodo</li></ul>
+                            </li>
+                            <li>Conectores y pulidos:
+                                <ul><li>Diferencias UPC vs APC</li><li>Pérdidas por retorno (ORL)</li></ul>
+                            </li>
+                            <li>Código de colores internacional</li>
+                            <li>Estructura del cable y Sangrado de buffers</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW 1: DISEÑO GPON -->
-            <div id="view-diseno" class="view-panel">
-                <header class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6">
+            <!-- MÓDULO 02 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-share-network section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">02</span>
+                    <h2 class="module-title">Arquitecturas de Red</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Aprende a diferenciar y elegir la tecnología correcta para cada cliente. Descubre cuándo vender un enlace dedicado (P2P) a una empresa y cuándo desplegar una red masiva (GPON) para un barrio.
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
                     <div>
-                        <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-1 block">Herramienta de Planificación</span>
-                        <h2 class="text-3xl font-heading font-bold text-white">Calculadora Diseño Red GPON / XGPON</h2>
-                        <p class="text-gray-400 text-sm mt-2 max-w-xl">Configure las características de su proyecto para obtener una estimación de inversión.</p>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Redes P2P (Active Ethernet)</h4>
+                        <ul>
+                            <li>Concepto y filosofía</li>
+                            <li>Ancho de banda</li>
+                            <li>Seguridad física</li>
+                            <li>Topologías: Estrella, Anillo, Redundancia</li>
+                            <li>Equipamiento activo (Hardware): Cabecera, Cliente</li>
+                        </ul>
                     </div>
-                </header>
-
-                <!-- PASO 1: SELECCIÓN DE DISEÑO -->
-                <div class="mb-10">
-                    <h3 class="text-white text-sm font-bold uppercase tracking-wide mb-4 flex items-center gap-2">
-                        <span class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center text-xs font-bold">1</span> 
-                        Seleccione el Tipo de Diseño
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Estándar -->
-                        <label class="relative cursor-pointer group">
-                            <input type="radio" name="tipo_diseno" value="estandar" class="radio-card-input sr-only" checked onchange="updateUIState()">
-                            <div class="radio-card h-full p-6 rounded-xl border border-white/10 bg-[#161521] hover:border-white/30 transition-all relative overflow-hidden flex flex-col">
-                                <div class="absolute top-4 right-4 check-icon opacity-0 transform scale-75 transition-all duration-300">
-                                    <div class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center"><i class="ph-bold ph-check"></i></div>
-                                </div>
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="w-10 h-10 rounded-lg bg-[#1A1B29] border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
-                                        <i class="ph-bold ph-pencil-simple text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-white font-bold text-lg uppercase">Diseño Estándar</h4>
-                                        <span class="text-[10px] text-gray-500 font-mono font-bold tracking-wider">IDEAL PARA UNA RÁPIDA EJECUCIÓN</span>
-                                    </div>
-                                </div>
-                                <p class="text-gray-400 text-xs mb-4 leading-relaxed">Paquete técnico esencial para la implementación física de la red. Enfocado en funcionalidad y presupuesto.</p>
-                                <div class="mt-auto space-y-2 border-t border-white/5 pt-4">
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Estudio de Proyecto (ROI, Penetración)</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Levantamiento de Campo (Postes/HPs)</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Planos de tendido (PDF) y Cálculo de Materiales</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Red en digital editable (KMZ)</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Diagramas de Empalme y Presupuesto Óptico</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Expediente empresa eléctrica (Estándar)</span></div>
-                                </div>
-                            </div>
-                        </label>
-
-                        <!-- Integral -->
-                        <label class="relative cursor-pointer group">
-                            <input type="radio" name="tipo_diseno" value="integral" class="radio-card-input sr-only" onchange="updateUIState()">
-                            <div class="radio-card h-full p-6 rounded-xl border border-white/10 bg-[#161521] hover:border-white/30 transition-all relative overflow-hidden flex flex-col">
-                                <div class="absolute top-4 right-4 check-icon opacity-0 transform scale-75 transition-all duration-300">
-                                    <div class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center"><i class="ph-bold ph-check"></i></div>
-                                </div>
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="w-10 h-10 rounded-lg bg-[#1A1B29] border border-white/10 flex items-center justify-center text-[#FCBF26]">
-                                        <i class="ph-bold ph-star text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-white font-bold text-lg uppercase">Diseño Integral</h4>
-                                        <span class="text-[10px] text-[#FCBF26] font-mono font-bold tracking-wider">PARA EXPEDIENTES ELÉCTRICOS</span>
-                                    </div>
-                                </div>
-                                <p class="text-gray-400 text-xs mb-4 leading-relaxed">Solución completa que incluye formatos exigidos por concesionarias eléctricas para permisos de uso de postes.</p>
-                                <div class="mt-auto space-y-2 border-t border-white/5 pt-4">
-                                    <div class="flex items-start gap-2 text-[11px] text-white font-bold"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Todo lo del plan Estándar +</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Red editable en KMZ / AutoCAD / ArcGIS</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Memoria descriptiva (armados, especificaciones)</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Cálculos de Esfuerzo Mecánico</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Expediente empresas eléctricas (Integral)</span></div>
-                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Expediente permisos municipales</span></div>
-                                </div>
-                            </div>
-                        </label>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Redes GPON</h4>
+                        <ul>
+                            <li>Concepto y filosofía</li>
+                            <li>Multiplexación</li>
+                            <li>Economía de escala</li>
+                            <li>Equipamiento GPON: Cabecera, Planta externa, Cliente</li>
+                            <li>XGPON</li>
+                        </ul>
                     </div>
                 </div>
-
-                <!-- PASO 2: LEVANTAMIENTO -->
-                <div class="mb-10">
-                    <h3 class="text-white text-sm font-bold uppercase tracking-wide mb-4 flex items-center gap-2">
-                        <span class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center text-xs font-bold">2</span> 
-                        Información de Campo (Postería)
-                    </h3>
-                    <div class="bg-[#161521] border border-white/5 rounded-xl p-6">
-                        <p class="text-gray-400 text-sm mb-4 leading-relaxed">El servicio estándar e integral incluyen el levantamiento de información en campo. Sin embargo, si ya cuenta con esta información, o desea levantarla por su cuenta podemos optimizar el costo del proyecto.</p>
-                        <label class="flex items-start gap-3 p-4 bg-[#0A0912] border border-white/10 rounded-lg cursor-pointer hover:border-[#FCBF26]/30 transition-colors group">
-                            <input type="checkbox" id="info-levantada" class="mt-1 w-5 h-5 accent-[#FCBF26] bg-[#161521] border-white/20 rounded cursor-pointer" onchange="calcularPresupuesto()">
-                            <div>
-                                <span class="block text-white text-sm font-bold group-hover:text-[#FCBF26] transition-colors">Ya cuento con el levantamiento de información / Deseo realizarlo</span>
-                                <span class="block text-[#FCBF26] text-xs mt-1 font-bold">Se reducirá el costo del servicio.</span>
-                            </div>
-                        </label>
-                        <p class="text-[11px] text-gray-500 mt-3 italic pl-2">* Si desea realizar el levantamiento por su cuenta, podemos capacitar a su personal para realizarlo bajo nuestros estándares técnicos.</p>
-                    </div>
+                <div class="mt-6 pt-4 border-t border-white/10 text-center relative z-10">
+                    <span class="text-xs font-mono text-gray-400 uppercase tracking-widest block md:inline">Incluye: Comparativa Técnica/Económica y Redes Híbridas</span>
                 </div>
+            </div>
 
-                <!-- PASO 3: INPUTS Y MAPA -->
-                <div class="mb-10">
-                    <h3 class="text-white text-sm font-bold uppercase tracking-wide mb-4 flex items-center gap-2">
-                        <span class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center text-xs font-bold">3</span> 
-                        Defina el Área del Proyecto
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                            <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Ubicación del Proyecto</label>
-                            <input type="text" id="lugar-input" placeholder="Ej. Yanahuara, Arequipa" class="w-full bg-[#161521] border border-white/10 rounded-lg p-3 text-white text-sm focus:border-[#FCBF26] outline-none transition-colors">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Área Total (km²)</label>
-                            <div class="flex items-center gap-2">
-                                <input type="number" id="area-input" placeholder="0.00" class="w-full bg-[#161521] border border-white/10 rounded-lg p-3 text-white text-right font-mono font-bold text-lg focus:border-[#FCBF26] outline-none transition-colors">
-                                <span class="text-gray-500 font-bold text-sm">km²</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" onclick="manualCalculate()" class="w-full py-4 bg-gradient-to-r from-[#1A1B29] to-[#161521] border border-white/10 text-white font-bold uppercase tracking-widest text-xs rounded-xl hover:border-[#FCBF26] hover:text-[#FCBF26] transition-all shadow-lg flex items-center justify-center gap-2 group mb-8">
-                        Calcular Inversión 
-                        <i class="ph-bold ph-calculator text-lg group-hover:rotate-12 transition-transform"></i>
-                    </button>
-
-                    <!-- SECCIÓN: MAPA TRIGGER -->
-                    <div onclick="toggleMap()" class="w-full p-5 rounded-xl border border-[#FCBF26]/30 bg-[#FCBF26]/5 relative group cursor-pointer hover:bg-[#FCBF26]/10 transition-all duration-300 shadow-[0_0_15px_rgba(252,191,38,0.05)] hover:shadow-[0_0_25px_rgba(252,191,38,0.1)]">
-                        <div class="flex items-center gap-5">
-                            <div class="w-12 h-12 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform">
-                                <i class="ph-bold ph-map-trifold text-2xl"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="text-white font-bold text-sm uppercase tracking-wide group-hover:text-[#FCBF26] transition-colors">¿No conoces el área exacta?</h4>
-                                <p class="text-gray-400 text-xs mt-1 leading-relaxed">Usa nuestra herramienta de mapa inteligente para dibujar tu zona y calcular el kilometraje automáticamente.</p>
-                            </div>
-                            <div class="text-[#FCBF26] text-2xl group-hover:translate-y-1 transition-transform">
-                                <i class="ph-bold ph-caret-down"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Contenedor Mapa (Oculto inicialmente) -->
-                    <div id="map-wrapper" class="hidden relative w-full h-[450px] bg-[#161521] rounded-xl border border-white/10 overflow-hidden shadow-2xl mt-4 animate-[fadeIn_0.3s_ease-out]">
-                        <div id="map-container" class="w-full h-full z-10 bg-[#0A0912]"></div>
-                        <div id="map-instructions" class="absolute top-4 left-4 z-[400] bg-[#100F1D]/90 backdrop-blur border border-white/10 p-3 rounded-lg max-w-[200px] shadow-lg pointer-events-none">
-                            <h5 class="text-[#FCBF26] text-[10px] font-bold uppercase mb-2">Instrucciones</h5>
-                            <ul class="text-[10px] text-gray-300 space-y-1.5">
-                                <li class="flex items-center gap-2"><i class="ph-bold ph-mouse-left-click"></i> Clic Izq: Crear punto</li>
-                                <li class="flex items-center gap-2"><i class="ph-bold ph-mouse-right-click"></i> Clic Der: Eliminar punto</li>
-                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-500"></i> Botón: Cerrar área</li>
-                            </ul>
-                        </div>
-                        <div class="absolute top-4 right-4 z-[400] flex flex-col gap-2 bg-[#161521] border border-white/10 p-1.5 rounded-lg shadow-xl backdrop-blur-md">
-                            <button type="button" onclick="undoLastPoint()" class="w-9 h-9 flex items-center justify-center rounded bg-white/5 hover:bg-white/20 text-white transition-colors" title="Deshacer último punto"><i class="ph-bold ph-arrow-u-up-left"></i></button>
-                            <button type="button" onclick="clearMap()" class="w-9 h-9 flex items-center justify-center rounded bg-red-600 text-white hover:text-red-100 transition-colors" title="Borrar todo"><i class="ph-bold ph-trash"></i></button>
-                            <button type="button" onclick="finishPolygon()" class="w-9 h-9 flex items-center justify-center rounded bg-[#FCBF26] text-[#100F1D] hover:bg-white transition-colors shadow-lg" title="Terminar edición"><i class="ph-bold ph-check"></i></button>
-                        </div>
-                    </div>
+            <!-- MÓDULO 03 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-tree-structure section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">03</span>
+                    <h2 class="module-title">Topologías de Distribución</h2>
                 </div>
-
-                <!-- 4. RESULTADOS (GPON) -->
-                <div id="calc-result-box" class="hidden flex-col gap-6 pt-6 border-t border-white/10 animate-[fadeIn_0.5s_ease-out] mb-12">
-                    <div id="large-project-warning" class="hidden bg-[#FCBF26]/10 border border-[#FCBF26]/30 p-4 rounded-lg flex items-start gap-3">
-                        <i class="ph-fill ph-warning text-[#FCBF26] text-xl mt-0.5"></i>
-                        <div>
-                            <h4 class="text-[#FCBF26] font-bold text-sm">Proyecto de Gran Envergadura (>15 km²)</h4>
-                            <p class="text-gray-400 text-xs mt-1">Para proyectos de esta magnitud, se requiere un análisis de presupuesto personalizado. Por favor, contacte directamente a ingeniería.</p>
-                        </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    El corazón del negocio: domina las redes balanceadas y desbalanceadas. Aprenderás a optimizar costos y cobertura según la geografía, decidiendo inteligentemente dónde aplicar cada estructura.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Tipos de Redes</h4>
+                        <ul>
+                            <li>Red Balanceada (Centralizada)</li>
+                            <li>Red Desbalanceada (Cascada): Through (paso), Tap/drop (derivación)</li>
+                            <li>Comparativa técnica: Eficiencia de fibra y Gestión de potencia</li>
+                        </ul>
                     </div>
-                    <div class="bg-gradient-to-r from-[#161521] to-[#100F1D] border border-[#FCBF26]/30 rounded-2xl p-6 md:p-8 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
-                        <div class="absolute top-0 right-0 w-64 h-64 bg-[#FCBF26]/5 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none"></div>
-                        <div class="relative z-10 w-full md:w-auto text-center md:text-left">
-                            <span class="block text-gray-400 text-[10px] uppercase tracking-widest mb-2 font-bold">Inversión Estimada (Referencial)</span>
-                            <div class="flex items-baseline justify-center md:justify-start gap-2 mb-2">
-                                <span id="calc-price-display" class="text-5xl font-mono font-bold text-[#FCBF26] tracking-tighter drop-shadow-lg">$0.00</span>
-                                <span class="text-sm font-bold text-gray-500 self-end mb-2">USD</span>
-                            </div>
-                            <p class="text-[10px] text-gray-500 italic max-w-xs mx-auto md:mx-0 border-t border-white/5 pt-2 mt-2">* Precio calculado según tarifa ISP estándar.</p>
-                        </div>
-                        <div class="relative z-10 w-full md:max-w-md text-center md:text-right border-t md:border-t-0 md:border-l border-white/5 pt-6 md:pt-0 md:pl-8">
-                            <h4 class="text-white font-bold text-sm mb-2">¿Te parece viable?</h4>
-                            <p class="text-xs text-gray-400 mb-5 leading-relaxed">Sin formularios largos ni esperas. Al hacer clic, te enviaremos la cotización final directamente a tu WhatsApp.</p>
-                            <button type="button" onclick="contactarAsesor()" class="w-full py-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase tracking-widest text-xs rounded-xl transition-all duration-300 shadow-[0_4px_20px_rgba(37,211,102,0.2)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.3)] flex items-center justify-center gap-3 transform hover:-translate-y-1 group relative overflow-hidden">
-                                <i class="ph-bold ph-whatsapp-logo text-xl animate-pulse"></i> 
-                                <span class="relative z-10">Solicitar Cotización Oficial Ahora</span>
-                            </button>
-                        </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Análisis y Aplicación</h4>
+                        <ul>
+                            <li>Análisis económico: CAPEX (Inversión), OPEX (Mantenimiento)</li>
+                            <li>Criterios de aplicación: Escenario urbano denso vs rural disperso</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW 2: EXPEDIENTES (ASISTENTE WIZARD) -->
-            <div id="view-expediente" class="view-panel">
-                <header class="mb-8 border-b border-white/5 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <!-- MÓDULO 04 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-ruler section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">04</span>
+                    <h2 class="module-title">Introducción a Diseño de Redes</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    "Si no se diseña, se fracasa". Conoce la ruta crítica de un proyecto exitoso, los entregables obligatorios y cómo levantar información de campo correctamente antes de empezar a diseñar.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
                     <div>
-                        <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-1 block">Gestión de Permisos</span>
-                        <h2 class="text-3xl font-heading font-bold text-white">Asistente de Expedientes Eléctricos</h2>
-                        <p class="text-gray-400 text-sm mt-2 max-w-xl">Responda unas breves preguntas para cotizar su gestión de alquiler de postes.</p>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">¿Por qué priorizar tu diseño?</h4>
+                        <ul>
+                            <li>Importancia del diseño profesional</li>
+                            <li>Contenido:
+                                <ul>
+                                    <li>Memoria Descriptiva y Planos</li>
+                                    <li>Cálculo de materiales e inversión</li>
+                                    <li>Topología y Presupuesto Optico</li>
+                                    <li>Expedientes y Cálculo mecánico</li>
+                                    <li>Informe de instalación</li>
+                                </ul>
+                            </li>
+                        </ul>
                     </div>
                     <div>
-                        <span class="px-3 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/30 text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 w-fit tag-peru">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Peru.svg" alt="Peru" class="w-4 h-3 rounded-sm object-cover"> Exclusivo Perú
-                        </span>
-                    </div>
-                </header>
-
-                <div class="max-w-4xl mx-auto">
-                    <!-- Progress Bar -->
-                    <div class="flex justify-between mb-8 relative">
-                        <div class="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -z-10"></div>
-                        <div id="progress-bar" class="absolute top-1/2 left-0 h-0.5 bg-[#FCBF26] -z-10 transition-all duration-300" style="width: 0%"></div>
-                        <!-- Steps -->
-                        <div class="w-8 h-8 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center font-bold text-xs relative z-10 transition-colors" id="step-dot-1">1</div>
-                        <div class="w-8 h-8 rounded-full bg-[#161521] border border-white/20 text-gray-500 flex items-center justify-center font-bold text-xs relative z-10 transition-colors" id="step-dot-2">2</div>
-                        <div class="w-8 h-8 rounded-full bg-[#161521] border border-white/20 text-gray-500 flex items-center justify-center font-bold text-xs relative z-10 transition-colors" id="step-dot-3">3</div>
-                        <div class="w-8 h-8 rounded-full bg-[#161521] border border-white/20 text-gray-500 flex items-center justify-center font-bold text-xs relative z-10 transition-colors" id="step-dot-4">4</div>
-                        <div class="w-8 h-8 rounded-full bg-[#161521] border border-white/20 text-gray-500 flex items-center justify-center font-bold text-xs relative z-10 transition-colors" id="step-dot-5">5</div>
-                    </div>
-
-                    <!-- STEP 1: REQUISITOS -->
-                    <div id="step-1" class="wizard-step active-step bg-[#161521] border border-white/10 rounded-xl p-8">
-                        <h3 class="text-xl font-bold text-white mb-6">1. Requisitos de la Empresa Eléctrica</h3>
-                        <p class="text-gray-400 text-sm mb-6">¿Conoce la información requerida por la empresa eléctrica para el alquiler de sus postes?</p>
-                        
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <button onclick="setWizardData('requisitos', true); nextStep(2)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-white font-bold">
-                                Sí, conozco los requisitos
-                            </button>
-                            <button id="btn-no-req" onclick="toggleWarningReq()" class="p-4 border border-white/10 rounded-lg hover:border-red-400 hover:bg-red-500/10 transition-all text-white font-bold">
-                                No estoy seguro
-                            </button>
-                        </div>
-                        <div id="warning-req" class="hidden p-4 bg-yellow-500/5 border border-yellow-500/30 text-yellow-200 text-sm rounded-lg animate-[fadeIn_0.3s_ease-out]">
-                            <div class="flex flex-col gap-2">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <i class="ph-bold ph-warning text-xl text-[#FCBF26]"></i>
-                                    <strong class="text-[#FCBF26]">Aviso Importante</strong>
-                                </div>
-                                <p class="mb-2">Es necesario conocerlos, pero podemos continuar con la cotización referencial.</p>
-                                <button onclick="setWizardData('requisitos', false); nextStep(2)" class="w-full px-5 py-3 bg-[#FCBF26] text-[#100F1D] text-xs font-bold uppercase rounded hover:bg-white transition-colors shadow-lg text-center">
-                                    Continuar de todas formas
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- STEP 2: INFORMACIÓN DE CAMPO -->
-                    <div id="step-2" class="wizard-step bg-[#161521] border border-white/10 rounded-xl p-8">
-                        <h3 class="text-xl font-bold text-white mb-6">2. Información de Campo</h3>
-                        <p class="text-gray-400 text-sm mb-6">¿Tiene la información técnica completa de los postes en base a los requisitos de la empresa eléctrica?</p>
-                        <div class="grid grid-cols-1 gap-4">
-                            <button onclick="setWizardData('info_completa', true); nextStep(3)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-left group">
-                                <span class="block text-white font-bold group-hover:text-[#FCBF26]">Sí, tengo la información</span>
-                                <span class="text-xs text-gray-500">No requiere servicio de levantamiento.</span>
-                            </button>
-                            <button onclick="setWizardData('info_completa', false); nextStep(3)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-left group">
-                                <span class="block text-white font-bold group-hover:text-[#FCBF26]">No, necesito levantar la información</span>
-                                <span class="text-xs text-gray-500">Se incluirá el costo de personal en campo.</span>
-                            </button>
-                        </div>
-                        <button onclick="prevStep(1)" class="mt-6 px-4 py-2 border border-white/10 rounded text-gray-400 text-xs hover:text-white hover:border-white/30 flex items-center gap-2 w-fit"><i class="ph-bold ph-arrow-left"></i> Atrás</button>
-                    </div>
-
-                    <!-- STEP 3: CANTIDAD DE POSTES -->
-                    <div id="step-3" class="wizard-step bg-[#161521] border border-white/10 rounded-xl p-8 relative">
-                        <div class="flex flex-col md:flex-row gap-8 mb-6">
-                            <div class="flex-1">
-                                <h3 class="text-xl font-bold text-white mb-6">3. Cantidad de Postes</h3>
-                                <div class="flex flex-col gap-3 mb-6 max-w-sm">
-                                    <label class="flex items-center gap-3 cursor-pointer text-white p-3 rounded border border-white/10 bg-[#0A0912] hover:border-[#FCBF26]/50 transition-colors text-xs font-bold">
-                                        <input type="radio" name="wiz_postes_mode" value="input" checked onchange="toggleWizPostesMode()" class="accent-[#FCBF26] w-4 h-4"> 
-                                        Sí, ingresaré el número
-                                    </label>
-                                    <label class="flex items-center gap-3 cursor-pointer text-white p-3 rounded border border-white/10 bg-[#0A0912] hover:border-[#FCBF26]/50 transition-colors text-xs font-bold">
-                                        <input type="radio" name="wiz_postes_mode" value="mapa" onchange="toggleWizPostesMode()" class="accent-[#FCBF26] w-4 h-4"> 
-                                        No, dibujaré la ruta
-                                    </label>
-                                </div>
-                                <div id="wiz-postes-input" class="max-w-xs">
-                                    <div class="relative w-full mb-3">
-                                        <input type="number" id="wiz-num-postes" placeholder="Ej. 150" class="w-full bg-[#0A0912] border border-white/10 rounded-lg py-2.5 px-4 text-left text-white text-base font-bold focus:border-[#FCBF26] outline-none">
-                                        <span class="absolute right-4 top-2.5 text-gray-600 font-bold text-xs pointer-events-none pt-1">POSTES</span>
-                                    </div>
-                                    <button onclick="validatePostesAndNext()" class="w-full py-2.5 bg-[#FCBF26] text-[#100F1D] font-bold rounded-lg hover:bg-white transition-colors text-xs uppercase tracking-wide shadow-md">Siguiente</button>
-                                </div>
-                            </div>
-                            <div class="md:w-1/3 flex flex-col justify-start pt-2">
-                                <div class="p-4 bg-[#FCBF26]/5 border border-[#FCBF26]/20 rounded-lg">
-                                    <p class="text-xs text-gray-400 leading-relaxed mb-2">
-                                        Si no conoce la cantidad de postes podemos calcular un estimado en base a la ruta de su fibra que desee regularizar.
-                                    </p>
-                                    <p class="text-xs text-[#FCBF26] leading-relaxed font-bold">
-                                        "Si selecciona 'No, dibujaré la ruta' podrá dibujar sus rutas en un mapa interactivo."
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="wiz-postes-map" class="hidden animate-[fadeIn_0.3s_ease-out] border-t border-white/10 pt-6 mt-2">
-                            <div class="w-full h-[400px] bg-[#0A0912] rounded-xl border border-white/10 relative overflow-hidden group">
-                                <div id="wiz-map-container" class="w-full h-full z-10" style="cursor: crosshair;"></div>
-                                <div class="absolute top-3 left-3 z-[400] bg-[#161521]/90 backdrop-blur border border-white/10 p-3 rounded-lg shadow-xl pointer-events-none max-w-[200px]">
-                                    <h6 class="text-[#FCBF26] text-[10px] font-bold uppercase mb-1">Controles de Edición</h6>
-                                    <ul class="text-[10px] text-gray-300 space-y-1.5">
-                                        <li><span class="text-white font-bold">Clic Izq:</span> Añadir punto</li>
-                                        <li><span class="text-white font-bold">Clic Der:</span> Borrar último punto</li>
-                                        <li class="pt-2 border-t border-white/10 mt-1 text-[#FCBF26] leading-tight">Al terminar una línea puede dibujar otra automáticamente.</li>
-                                    </ul>
-                                </div>
-                                <div class="absolute top-3 right-3 z-[400] flex flex-col gap-2">
-                                    <button onclick="wizFinishLine()" class="px-3 py-1.5 bg-[#161521] text-white text-xs border border-white/20 rounded hover:bg-black/80 hover:border-white/40 shadow-lg transition-colors flex items-center gap-2" title="Cierra la línea actual para empezar otra separada">
-                                        <i class="ph-bold ph-scissors"></i> Terminar Línea Actual
-                                    </button>
-                                    <button onclick="wizClear()" class="px-3 py-1.5 bg-red-600 text-white text-xs border border-red-500/30 rounded hover:bg-red-700 shadow-lg transition-colors flex items-center gap-2">
-                                        <i class="ph-bold ph-trash"></i> Borrar Todo
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mt-4 flex justify-between items-center bg-[#0A0912] p-4 rounded-lg border border-white/10">
-                                <div>
-                                    <span class="text-xs text-gray-500 block uppercase tracking-wide">Estimación Total (1 poste / 35m)</span>
-                                    <div class="flex items-baseline gap-2">
-                                        <span id="wiz-map-result" class="text-white font-mono font-bold text-2xl">0</span>
-                                        <span class="text-sm text-[#FCBF26] font-bold">Postes</span>
-                                    </div>
-                                </div>
-                                <button onclick="nextStep(4)" class="px-8 py-3 bg-[#FCBF26] text-[#100F1D] font-bold text-xs uppercase tracking-wider rounded hover:bg-white transition-colors shadow-[0_0_15px_rgba(252,191,38,0.3)]">
-                                    Confirmar Rutas <i class="ph-bold ph-check ml-1"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <button onclick="prevStep(2)" class="mt-6 px-4 py-2 border border-white/10 rounded text-gray-400 text-xs hover:text-white hover:border-white/30 flex items-center gap-2 w-fit"><i class="ph-bold ph-arrow-left"></i> Atrás</button>
-                    </div>
-
-                    <!-- STEP 4: CÁLCULO MECÁNICO -->
-                    <div id="step-4" class="wizard-step bg-[#161521] border border-white/10 rounded-xl p-8">
-                        <h3 class="text-xl font-bold text-white mb-6">4. Cálculos Justificativos</h3>
-                        <p class="text-gray-400 text-sm mb-6">¿En los requisitos piden cálculo de esfuerzo mecánico o justificación técnica?</p>
-                        <div class="grid grid-cols-1 gap-4">
-                            <button onclick="setWizardData('mecanico', true); nextStep(5)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-left group">
-                                <span class="block text-white font-bold group-hover:text-[#FCBF26]">Sí, lo piden</span>
-                                <span class="text-xs text-gray-500">Se incluirá en el costo (Gratis si el proyecto es grande).</span>
-                            </button>
-                            <button onclick="setWizardData('mecanico', false); nextStep(5)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-left group">
-                                <span class="block text-white font-bold group-hover:text-[#FCBF26]">No, no lo piden</span>
-                                <span class="text-xs text-gray-500">No se incluirá este costo.</span>
-                            </button>
-                        </div>
-                        <button onclick="prevStep(3)" class="mt-6 px-4 py-2 border border-white/10 rounded text-gray-400 text-xs hover:text-white hover:border-white/30 flex items-center gap-2 w-fit"><i class="ph-bold ph-arrow-left"></i> Atrás</button>
-                    </div>
-
-                    <!-- STEP 5: FIRMA -->
-                    <div id="step-5" class="wizard-step bg-[#161521] border border-white/10 rounded-xl p-8">
-                        <h3 class="text-xl font-bold text-white mb-6">5. Firma de Ingeniero</h3>
-                        <p class="text-gray-400 text-sm mb-6">¿Desea que incluyamos la firma de un Ing. de Telecomunicaciones colegiado?</p>
-                        <div class="grid grid-cols-1 gap-4 mb-6">
-                            <button onclick="setWizardData('firma', true); showResult()" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-left group">
-                                <span class="block text-white font-bold group-hover:text-[#FCBF26]">Sí, incluir firma</span>
-                            </button>
-                            <button onclick="setWizardData('firma', false); showResult()" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-left group">
-                                <span class="block text-white font-bold group-hover:text-[#FCBF26]">No es necesario</span>
-                            </button>
-                        </div>
-                        <button onclick="prevStep(4)" class="mt-6 px-4 py-2 border border-white/10 rounded text-gray-400 text-xs hover:text-white hover:border-white/30 flex items-center gap-2 w-fit"><i class="ph-bold ph-arrow-left"></i> Atrás</button>
-                    </div>
-
-                    <!-- RESULTADO FINAL -->
-                    <div id="wizard-result" class="wizard-step">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                            <!-- Left Card: Entregables -->
-                            <div class="bg-[#161521] border border-white/10 rounded-xl p-6 h-full flex flex-col">
-                                <h4 class="text-white text-xs font-bold uppercase tracking-wide mb-4 flex items-center gap-2 pb-3 border-b border-white/10">
-                                    <i class="ph-duotone ph-file-doc text-[#FCBF26]"></i> EXPEDIENTE INTEGRAL PARA EMPRESA ELECTRICA
-                                </h4>
-                                <ul id="wiz-entregables-list" class="space-y-3 flex-1"></ul>
-                            </div>
-                            <!-- Right Card: Price & CTA -->
-                            <div class="bg-gradient-to-br from-[#161521] to-[#0e0d19] border border-[#FCBF26]/30 rounded-xl p-6 relative overflow-hidden flex flex-col justify-between shadow-2xl">
-                                <div class="absolute top-0 right-0 w-32 h-32 bg-[#FCBF26]/5 rounded-full blur-[40px] -mr-10 -mt-10 pointer-events-none"></div>
-                                <div>
-                                    <span class="block text-gray-400 text-[10px] uppercase tracking-widest mb-2 font-bold">Total Inversión Estimada</span>
-                                    <div class="flex items-baseline gap-2 mb-2">
-                                        <span class="text-3xl font-bold text-[#FCBF26]">S/</span>
-                                        <span id="wiz-total-display" class="text-5xl font-mono font-bold text-[#FCBF26] tracking-tighter drop-shadow-lg">0.00</span>
-                                    </div>
-                                    <p class="text-[10px] text-gray-500 italic border-t border-white/5 pt-2 mt-2">* Precio referencial exclusivo para Perú.</p>
-                                </div>
-                                <div class="mt-6 pt-6 border-t border-white/5">
-                                    <h4 class="text-white font-bold text-sm mb-2">¿Te parece viable?</h4>
-                                    <p class="text-xs text-gray-400 mb-4 leading-relaxed">Sin formularios largos ni esperas. Al hacer clic, te enviaremos la cotización final directamente a tu WhatsApp.</p>
-                                    <button onclick="contactarWizard()" class="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase tracking-widest text-xs rounded-xl transition-all duration-300 shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-1">
-                                        <i class="ph-bold ph-whatsapp-logo text-lg"></i> Solicitar Cotización
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <button onclick="resetWizard()" class="mx-auto flex items-center gap-2 px-8 py-3 border border-white/10 rounded-full text-gray-400 text-xs font-bold uppercase hover:text-white hover:bg-white/5 hover:border-[#FCBF26] transition-all">
-                            <i class="ph-bold ph-arrows-counter-clockwise"></i> Volver a calcular
-                        </button>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Herramientas y Procesos</h4>
+                        <ul>
+                            <li>Software: Google Earth, ArcGIS, AutoCAD</li>
+                            <li>Proceso incial:
+                                <ul>
+                                    <li>Estudio y cronograma</li>
+                                    <li>Levantamiento de información</li>
+                                    <li>Reconocimiento de postería</li>
+                                    <li>App móvil <span class="hl">APP</span></li>
+                                </ul>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW 3: IMPLEMENTACIÓN -->
-            <div id="view-implementacion" class="view-panel">
-                <header class="mb-8 border-b border-white/5 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <!-- MÓDULO 05 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-globe-stand section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">05</span>
+                    <h2 class="module-title">Planta Externa - Práctica</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Pasa de la teoría a la acción dominando el 'Tridente del Diseño'. Aprenderás a ubicarte con Google Earth, procesar datos masivos con ArcGIS y desarrollar una topolgia profesional en AutoCAD.
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
                     <div>
-                        <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-1 block">Despliegue de Red</span>
-                        <h2 class="text-3xl font-heading font-bold text-white">Calculadora de Implementación</h2>
-                        <p class="text-gray-400 text-sm mt-2 max-w-xl">Cotización detallada de mano de obra para Planta Externa e Interna.</p>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Google Earth <span class="hl text-white border-none bg-transparent pl-0">DISEÑO BASE</span></h4>
+                        <ul>
+                            <li>Instalación y Organización</li>
+                            <li>Creación de puntos/líneas/polígonos</li>
+                            <li>Simbologías y Diseño práctico</li>
+                        </ul>
+                        <br>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">ArcGIS <span class="hl text-white border-none bg-transparent pl-0">MATERIALES</span></h4>
+                        <ul>
+                            <li>Importar KMZ y editar Shapefiles</li>
+                            <li>Etiquetado automatizado (postes/NAPs)</li>
+                            <li>Selección de ferreterías y Armados</li>
+                            <li>Cálculo de materiales (Excel + ArcGIS)</li>
+                        </ul>
                     </div>
                     <div>
-                        <span class="px-3 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 w-fit">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Peru.svg" alt="Peru" class="w-4 h-3 rounded-sm object-cover"> Exclusivo Perú
-                        </span>
-                        <a href="https://wa.me/51978649801" target="_blank" class="text-[9px] text-[#FCBF26] block mt-1 hover:underline text-right">¿Otro país? Contáctanos</a>
-                    </div>
-                </header>
-                <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                    <div class="xl:col-span-2 space-y-6">
-                        <!-- Planta Externa -->
-                        <div class="bg-[#161521] border border-white/10 rounded-xl p-6">
-                            <h3 class="text-white font-bold text-sm uppercase mb-4 flex items-center gap-2 border-b border-white/5 pb-3"><i class="ph-bold ph-globe text-[#FCBF26]"></i> Planta Externa (Red de Distribución)</h3>
-                            <p class="text-xs text-gray-400 mb-4">Ingrese las cantidades a implementar:</p>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Fibra Óptica (km)</label>
-                                    <div class="relative">
-                                        <input type="number" id="imp-km" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcImplementacion()">
-                                        <span class="absolute right-3 top-3 text-gray-600 text-xs font-bold pointer-events-none">KM</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Cajas NAP (Und)</label>
-                                    <div class="relative">
-                                        <input type="number" id="imp-naps" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcImplementacion()">
-                                        <span class="absolute right-3 top-3 text-gray-600 text-xs font-bold pointer-events-none">UND</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Mufas / Empalmes</label>
-                                    <div class="relative">
-                                        <input type="number" id="imp-mufas" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcImplementacion()">
-                                        <span class="absolute right-3 top-3 text-gray-600 text-xs font-bold pointer-events-none">UND</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Planta Interna (Nodos) -->
-                        <div class="bg-[#161521] border border-white/10 rounded-xl p-6">
-                            <h3 class="text-white font-bold text-sm uppercase mb-6 flex items-center gap-2 border-b border-white/5 pb-3"><i class="ph-bold ph-server text-[#FCBF26]"></i> Planta Interna (Nodos)</h3>
-                            <div class="flex flex-col md:flex-row gap-8 items-start">
-                                <div class="flex-1">
-                                    <label class="flex items-center gap-3 cursor-pointer group w-fit mb-4">
-                                        <input type="checkbox" id="imp-check-nodo" class="w-4 h-4 accent-[#FCBF26] bg-[#0A0912] border-white/20 rounded cursor-pointer" onchange="toggleImpNodoInput()">
-                                        <span class="text-gray-300 text-xs font-bold group-hover:text-white">Requiere implementación de Nodo</span>
-                                    </label>
-                                    <div id="imp-nodo-container" class="hidden pl-7">
-                                        <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Cantidad de Nodos</label>
-                                        <div class="relative">
-                                            <input type="number" id="imp-nodos" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcImplementacion()">
-                                            <span class="absolute right-3 top-3 text-gray-600 text-xs font-bold pointer-events-none">UND</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex-1 border-l border-white/10 pl-6">
-                                    <h5 class="text-xs font-bold text-[#FCBF26] uppercase mb-2">Alcance del Servicio</h5>
-                                    <ul class="text-xs text-gray-400 space-y-2">
-                                        <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i> Ingreso de fibra al nodo</li>
-                                        <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i> Montado de equipos en rack</li>
-                                        <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i> Configuración de OLT/Router</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="xl:col-span-1">
-                        <div class="bg-gradient-to-b from-[#161521] to-[#0A0912] border border-[#FCBF26]/30 rounded-xl p-6 sticky top-6 shadow-2xl relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-40 h-40 bg-[#FCBF26]/5 rounded-full blur-[50px] -mr-10 -mt-10 pointer-events-none"></div>
-                            <h4 class="text-white font-bold text-sm mb-6 flex items-center gap-2"><i class="ph-fill ph-receipt text-[#FCBF26]"></i> Resumen de Inversión</h4>
-                            <div class="bg-[#1A1B29] rounded-lg p-4 mb-6 border border-white/5">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-[10px] text-gray-400 uppercase font-bold">Tiempo Estimado de Ejecución</span>
-                                    <span id="res-dias-cal" class="text-white font-mono font-bold">0 Días</span>
-                                </div>
-                                <div class="w-full bg-white/5 rounded-full h-1.5 mb-2">
-                                    <div id="time-bar" class="bg-[#FCBF26] h-1.5 rounded-full" style="width: 0%"></div>
-                                </div>
-                                <p class="text-[9px] text-[#FCBF26] text-right font-bold">Podemos ajustar el tiempo a la necesidad del proyecto.</p>
-                            </div>
-                            <div class="text-center mb-6 pt-4 border-t border-white/10">
-                                <span class="block text-gray-500 text-[10px] uppercase tracking-widest mb-1">Inversión Total Estimada</span>
-                                <div class="flex items-baseline justify-center gap-2">
-                                    <span class="text-2xl font-bold text-[#FCBF26]">S/</span>
-                                    <span id="imp-total-final" class="text-4xl font-mono font-bold text-[#FCBF26] tracking-tighter">0.00</span>
-                                </div>
-                            </div>
-                            <div class="mt-4">
-                                <h4 class="text-white font-bold text-sm mb-2 text-center">¿Te parece viable?</h4>
-                                <p class="text-xs text-gray-400 mb-4 leading-relaxed text-center">Sin formularios largos ni esperas. Al hacer clic, te enviaremos la cotización final directamente a tu WhatsApp.</p>
-                                <button onclick="contactarImplementacion()" class="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase text-xs rounded-lg transition-all shadow-[0_4px_20px_rgba(37,211,102,0.2)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.3)] flex items-center justify-center gap-2">
-                                    <i class="ph-bold ph-whatsapp-logo text-lg"></i> Solicitar Cotización
-                                </button>
-                            </div>
-                        </div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">AutoCAD <span class="hl text-white border-none bg-transparent pl-0">TOPOLOGÍA</span></h4>
+                        <ul>
+                            <li>Importar de ArcGIS y Dibujo vectorial</li>
+                            <li>Comandos y Manejo de escalas</li>
+                            <li>Creación de catastro</li>
+                            <li>Topología (Balanceada/Desbalanceada):
+                                <ul>
+                                    <li>Simbologías y Desarrollo práctico</li>
+                                    <li>Derivación en mufas y Fusiones NAP</li>
+                                    <li>Asignación de hilos en nodo</li>
+                                </ul>
+                            </li>
+                            <li>Cálculo de potencia (Plantillas xlsx) e Impresión</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW 4: ACTUALIZACIÓN -->
-            <div id="view-actualizacion" class="view-panel">
-                <header class="mb-8 border-b border-white/5 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <!-- MÓDULO 06 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-hard-drives section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">06</span>
+                    <h2 class="module-title">Planta Interna</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-4 relative z-10">
+                    Configura el cerebro de tu red. Aprende a dimensionar correctamente la OLT, los routers y el respaldo energético.
+                </p>
+                <div class="mb-8 p-4 bg-white/5 border-l-4 border-[#FCBF26] rounded-r-lg relative z-10">
+                    <p class="text-[#FCBF26] text-sm font-bold flex items-center gap-2">
+                        <i class="ph-bold ph-star"></i> Nota Especial:
+                    </p>
+                    <p class="text-gray-300 text-xs mt-1">
+                        Para esta sección tendremos un Ing. de Telecomunicaciones especializado invitado que dictará esta parte.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
                     <div>
-                        <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-1 block">Optimización de Red</span>
-                        <h2 class="text-3xl font-heading font-bold text-white">Actualización y Mantenimiento de Red</h2>
-                        <p class="text-gray-400 text-sm mt-2 max-w-xl">Potenciamos su infraestructura existente analizando oportunidades de mejora y optimización para asegurar que su red evolucione ante las demandas del mercado.</p>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Equipamiento</h4>
+                        <ul>
+                            <li>Router Borde/Core y Switch Agregación</li>
+                            <li>Selección de OLT (Cálculo de capacidad)</li>
+                            <li>ODF, Gabinetes y Racks</li>
+                            <li>Banco de baterías y Puesta a tierra</li>
+                        </ul>
                     </div>
-                </header>
-
-                <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                    <!-- Inputs & Info -->
-                    <div class="xl:col-span-2 space-y-6">
-                        <!-- Card Inputs -->
-                        <div class="bg-[#161521] border border-white/10 rounded-xl p-6">
-                            <h3 class="text-white font-bold text-sm uppercase mb-4 flex items-center gap-2 border-b border-white/5 pb-3">
-                                <i class="ph-bold ph-sliders-horizontal text-[#FCBF26]"></i> Alcance del Trabajo
-                            </h3>
-                            
-                            <!-- Opción Planos -->
-                            <div class="mb-6 bg-[#0A0912] p-3 rounded-lg border border-white/5">
-                                <label class="flex items-center gap-3 cursor-pointer group">
-                                    <input type="checkbox" id="act-check-planos" class="w-4 h-4 accent-[#FCBF26] bg-[#161521] border-white/20 rounded cursor-pointer" onchange="calcActualizacion()">
-                                    <div>
-                                        <span class="block text-white text-xs font-bold group-hover:text-[#FCBF26] transition-colors">Cuento con planos / KMZ de la red actual</span>
-                                        <span class="block text-[10px] text-gray-500">Reduce significativamente el tiempo de relevamiento.</span>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Fibra Óptica (km)</label>
-                                    <div class="relative">
-                                        <input type="number" id="act-km" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcActualizacion()">
-                                        <span class="absolute right-3 top-3 text-gray-600 text-xs font-bold pointer-events-none">KM</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Hilos Troncal Principal</label>
-                                    <div class="relative">
-                                        <input type="number" id="act-hilos" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcActualizacion()">
-                                        <span class="absolute right-3 top-3 text-gray-600 text-xs font-bold pointer-events-none">UND</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Cajas NAP (Und)</label>
-                                    <div class="relative">
-                                        <input type="number" id="act-naps" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcActualizacion()">
-                                        <span class="absolute right-3 top-3 text-gray-600 text-xs font-bold pointer-events-none">UND</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Mufas / Empalmes</label>
-                                    <div class="relative">
-                                        <input type="number" id="act-mufas" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcActualizacion()">
-                                        <span class="absolute right-3 top-3 text-gray-600 text-xs font-bold pointer-events-none">UND</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Entregables -->
-                        <div class="bg-[#161521] border border-white/10 rounded-xl p-6">
-                            <h3 class="text-white font-bold text-sm uppercase mb-4 flex items-center gap-2 border-b border-white/5 pb-3">
-                                <i class="ph-bold ph-list-checks text-[#FCBF26]"></i> Entregables Incluidos
-                            </h3>
-                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Relevamiento de información en campo.</li>
-                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Actualización de planos en CAD - KMZ - ARCGIS.</li>
-                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Actualización y optimización de topología.</li>
-                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Análisis para ampliación de red.</li>
-                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Relación actualizada de postes (expedientes).</li>
-                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Estado de fibra óptica, naps y mufas.</li>
-                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Instalación nuevos clientes.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Results -->
-                    <div class="xl:col-span-1">
-                        <div class="bg-gradient-to-b from-[#161521] to-[#0A0912] border border-[#FCBF26]/30 rounded-xl p-6 sticky top-6 shadow-2xl relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-40 h-40 bg-[#FCBF26]/5 rounded-full blur-[50px] -mr-10 -mt-10 pointer-events-none"></div>
-                            
-                            <h4 class="text-white font-bold text-sm mb-6 flex items-center gap-2"><i class="ph-fill ph-receipt text-[#FCBF26]"></i> Estimación de Inversión</h4>
-                            
-                            <div class="bg-[#1A1B29] rounded-lg p-4 mb-6 border border-white/5">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-[10px] text-gray-400 uppercase font-bold">Tiempo Estimado</span>
-                                    <span id="act-dias-cal" class="text-white font-mono font-bold">0 Días</span>
-                                </div>
-                                <div class="w-full bg-white/5 rounded-full h-1.5 mb-2">
-                                    <div id="act-time-bar" class="bg-[#FCBF26] h-1.5 rounded-full" style="width: 0%"></div>
-                                </div>
-                                <p class="text-[9px] text-[#FCBF26] text-right font-bold">Podemos ajustar el tiempo a la necesidad del proyecto.</p>
-                            </div>
-
-                            <div class="text-center mb-6 pt-4 border-t border-white/10">
-                                <span class="block text-gray-500 text-[10px] uppercase tracking-widest mb-1">Precio Final Sugerido</span>
-                                <div class="flex items-baseline justify-center gap-2">
-                                    <span class="text-2xl font-bold text-[#FCBF26]">S/</span>
-                                    <span id="act-total-final" class="text-4xl font-mono font-bold text-[#FCBF26] tracking-tighter">0.00</span>
-                                </div>
-                            </div>
-
-                            <div class="mt-4">
-                                <h4 class="text-white font-bold text-sm mb-2 text-center">¿Te parece viable?</h4>
-                                <p class="text-xs text-gray-400 mb-4 leading-relaxed text-center">Sin formularios largos ni esperas. Al hacer clic, te enviaremos la cotización final directamente a tu WhatsApp.</p>
-                                <button onclick="contactarActualizacion()" class="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase text-xs rounded-lg transition-all shadow-[0_4px_20px_rgba(37,211,102,0.2)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.3)] flex items-center justify-center gap-2">
-                                    <i class="ph-bold ph-whatsapp-logo text-lg"></i> Solicitar Cotización
-                                </button>
-                            </div>
-                        </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Lógica</h4>
+                        <ul>
+                            <li>Estructura de VLANs</li>
+                            <li>Configuración de OLT</li>
+                            <li>Creación de perfiles</li>
+                            <li>Gestión de software</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-        </main>
-    </div>
+            <!-- MÓDULO 07 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-wrench section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">07</span>
+                    <h2 class="module-title">Operación y Mantenimiento</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Una red que no se mantiene, muere. Descubre las estrategias clave para prevenir fallas masivas y aprende a resolver problemas rápidamente.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Estrategias</h4>
+                        <ul>
+                            <li>Mantenimiento Preventivo</li>
+                            <li>Mantenimiento Correctivo</li>
+                            <li>Mantenimiento Predictivo</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Resolución</h4>
+                        <ul>
+                            <li>Herramientas Físicas y Lógicas</li>
+                            <li>Tipos de problemas: Capa física vs Capa lógica</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-    <!-- SCRIPTS LÓGICOS -->
-    <script>
-        // --- 1. FONDO ---
-        (function() {
-            const bgCanvas = document.getElementById('bg-canvas');
-            let ctx, w, h, snakes = [];
-            class Snake {
-                constructor() { this.reset(); }
-                reset() { 
-                    this.x = Math.random() * w; this.y = Math.random() * h; 
-                    this.speed = 2 + Math.random() * 2; 
-                    this.angle = Math.floor(Math.random()*4) * (Math.PI/2);
-                    this.history = []; this.life = 100 + Math.random() * 100;
-                }
-                update() {
-                    this.life--; if(this.life <= 0) this.reset();
-                    this.history.push({x:this.x, y:this.y});
-                    if(this.history.length > 20) this.history.shift();
-                    this.x += Math.cos(this.angle) * this.speed;
-                    this.y += Math.sin(this.angle) * this.speed;
-                    if(this.x<0||this.x>w||this.y<0||this.y>h) this.reset();
-                    if(Math.random() < 0.02) this.angle += (Math.random()<0.5?1:-1)*(Math.PI/2);
-                }
-                draw() {
-                    if(this.history.length<2) return;
-                    ctx.beginPath();
-                    ctx.moveTo(this.history[0].x, this.history[0].y);
-                    for(let p of this.history) ctx.lineTo(p.x, p.y);
-                    ctx.strokeStyle = 'rgba(252, 191, 38, 0.4)';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-            }
-            function initBg() {
-                if(!bgCanvas) return;
-                w = bgCanvas.width = window.innerWidth;
-                h = bgCanvas.height = window.innerHeight;
-                ctx = bgCanvas.getContext('2d');
-                snakes = Array.from({length: 30}, () => new Snake()); 
-                animateBg();
-            }
-            function animateBg() {
-                if(!ctx) return;
-                ctx.clearRect(0,0,w,h);
-                snakes.forEach(s => { s.update(); s.draw(); });
-                requestAnimationFrame(animateBg);
-            }
-            window.addEventListener('resize', () => { if(bgCanvas) { w = bgCanvas.width = window.innerWidth; h = bgCanvas.height = window.innerHeight; } });
-            initBg();
-        })();
+            <!-- MÓDULO 08 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-folder-notch section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">08</span>
+                    <h2 class="module-title">Documentación de Red</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    El orden es dinero. Aprende a registrar y mantener actualizado el inventario de casa hilo y puerto para que tu red sea un activo valorable.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Generalidades e Importancia</h4>
+                        <ul>
+                            <li>Inventario de puertos</li>
+                            <li>Agilidad en reparaciones</li>
+                            <li>Valoración de empresa</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Actualización Permanente</h4>
+                        <ul>
+                            <li>Unifilares</li>
+                            <li>Digramas georeferenciados</li>
+                            <li>Planos As-Built</li>
+                            <li>Software utilizados (Google Earth, ArcGIS, AutoCAD)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-        // --- 2. NAVEGACIÓN ---
-        function switchView(viewId, btnElement) {
-            document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active-view'));
-            document.querySelectorAll('.menu-item, .mobile-nav-item').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active-view');
+            <!-- MÓDULO 09 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-file-text section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">09</span>
+                    <h2 class="module-title">Elaboración de Expedientes</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Formaliza tu proyecto. Te enseñaremos a generar todos los planos y documentos técnicos exigidos por concesionarias y municipios.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Planografía</h4>
+                        <ul>
+                            <li>Planos: Ubicación, Tendido, Seguridad, Corte vial</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Complementarios</h4>
+                        <ul>
+                            <li>Relación de postes UTM</li>
+                            <li>Memoria descriptiva</li>
+                            <li>Cálculos justificativos</li>
+                            <li>Especificaciones Técnicas y Detalle de armados</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- INFO FINAL (Footer del curso) -->
+        <div class="mt-20 bg-gradient-to-r from-[#161521] to-[#100F1D] border border-white/10 rounded-xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-8 shadow-2xl">
+            <div class="w-full md:w-2/3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div>
+                        <span class="block text-[#FCBF26] font-black text-xs uppercase mb-1">Fecha de Inicio</span>
+                        <span class="text-white font-bold text-lg">19 de Enero de 2026</span>
+                    </div>
+                    <div>
+                        <span class="block text-[#FCBF26] font-black text-xs uppercase mb-1">Modalidad</span>
+                        <span class="text-white font-bold text-lg">Online vía Google Meet</span>
+                    </div>
+                    <div>
+                        <span class="block text-[#FCBF26] font-black text-xs uppercase mb-1">Horario</span>
+                        <span class="text-white font-bold text-lg">L - M - V | 7:00 PM - 9:00 PM</span>
+                    </div>
+                    <div>
+                        <span class="block text-[#FCBF26] font-black text-xs uppercase mb-1">Duración</span>
+                        <span class="text-white font-bold text-lg">3 Semanas (24 Horas)</span>
+                    </div>
+                </div>
+                <p class="text-gray-500 text-xs italic mt-6 border-t border-white/5 pt-4">* Incluye Software y Sesiones Prácticas</p>
+            </div>
             
-            // Highlight Button
-            if (btnElement) btnElement.classList.add('active');
-            
-            // Scroll to top fix
-            document.querySelector('.main-content').scrollTop = 0;
+            <!-- Logo Inferior Corregido -->
+             <div class="h-20 flex items-center justify-center opacity-50 grayscale hover:grayscale-0 transition-all px-6">
+                <img src="img\LOGO_eva.png" alt="Logo Inferior" class="h-full w-auto object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'text-2xl font-bold text-gray-700\'>EVA</span>'">
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER SIMPLE -->
+    <footer class="text-center mt-20 text-gray-600 text-xs uppercase tracking-widest font-bold">
+        Programa de Especialización Profesional
+    </footer>
 
-            if (viewId === 'view-diseno' && typeof map !== 'undefined') setTimeout(() => map.invalidateSize(), 300);
-            if (viewId === 'view-expediente' && typeof wizMap !== 'undefined') setTimeout(() => wizMap.invalidateSize(), 300);
-        }
-
-        // --- 3. LÓGICA CALCULADORA DISEÑO (GPON) ---
-        const pricingData = [
-            { a: 0.5, s: 550, i: 670, l: 275 }, { a: 1.0, s: 787, i: 908, l: 325 }, { a: 1.5, s: 1021, i: 1201, l: 375 },
-            { a: 2.0, s: 1183, i: 1423, l: 375 }, { a: 2.5, s: 1409, i: 1710, l: 425 }, { a: 3.0, s: 1633, i: 1994, l: 475 },
-            { a: 3.5, s: 1956, i: 2377, l: 600 }, { a: 4.0, s: 2104, i: 2585, l: 600 }, { a: 4.5, s: 2386, i: 2927, l: 700 },
-            { a: 5.0, s: 2527, i: 3128, l: 700 }, { a: 5.5, s: 2664, i: 3326, l: 700 }, { a: 6.0, s: 2936, i: 3658, l: 800 },
-            { a: 6.5, s: 3307, i: 4089, l: 975 }, { a: 7.0, s: 3434, i: 4276, l: 975 }, { a: 7.5, s: 3558, i: 4460, l: 975 },
-            { a: 8.0, s: 3678, i: 4641, l: 975 }, { a: 8.5, s: 4001, i: 5024, l: 1125 }, { a: 9.0, s: 4287, i: 5369, l: 1250 },
-            { a: 9.5, s: 4397, i: 5540, l: 1250 }, { a: 10.0, s: 4503, i: 5706, l: 1250 }, { a: 10.5, s: 4606, i: 5870, l: 1250 },
-            { a: 11.0, s: 4706, i: 6029, l: 1250 }, { a: 11.5, s: 5077, i: 6461, l: 1450 }, { a: 12.0, s: 5273, i: 6717, l: 1525 },
-            { a: 12.5, s: 5363, i: 6866, l: 1525 }, { a: 13.0, s: 5448, i: 7013, l: 1525 }, { a: 13.5, s: 5531, i: 7155, l: 1525 },
-            { a: 14.0, s: 5610, i: 7294, l: 1525 }, { a: 14.5, s: 6029, i: 7774, l: 1775 }, { a: 15.0, s: 6136, i: 7941, l: 1800 }
-        ];
-
-        function updateUIState() {
-            const area = document.getElementById('area-input').value;
-            if(area && parseFloat(area) > 0) calcularPresupuesto();
-        }
-
-        function manualCalculate() {
-            const area = document.getElementById('area-input').value;
-            if(!area) {
-                 const input = document.getElementById('area-input');
-                 input.classList.add('border-red-500');
-                 setTimeout(() => input.classList.remove('border-red-500'), 1000);
-                 return;
-            }
-            calcularPresupuesto();
-        }
-
-        function calcularPresupuesto() {
-            const areaInput = document.getElementById('area-input').value;
-            const tipo = document.querySelector('input[name="tipo_diseno"]:checked').value;
-            const hasLevantamiento = document.getElementById('info-levantada').checked;
-            const resultBox = document.getElementById('calc-result-box');
-            const display = document.getElementById('calc-price-display');
-            const warning = document.getElementById('large-project-warning');
-
-            let area = parseFloat(areaInput);
-            if (!area || area <= 0) return;
-
-            resultBox.classList.remove('hidden');
-            resultBox.classList.add('flex');
-
-            if (area > 15) { 
-                warning.classList.remove('hidden');
-                warning.classList.add('flex');
-                display.innerHTML = "Cotizar"; 
-            } else {
-                warning.classList.add('hidden');
-                warning.classList.remove('flex');
-                let lookupArea = Math.round(area * 2) / 2;
-                if (lookupArea < 0.5) lookupArea = 0.5;
-                let row = pricingData.find(d => d.a === lookupArea);
-                if (!row) { row = pricingData.find(d => d.a > lookupArea); }
-                if (!row) row = pricingData[pricingData.length - 1];
-                let price = (tipo === 'estandar') ? row.s : row.i;
-                if (hasLevantamiento) price -= row.l;
-                display.innerHTML = `$${price.toLocaleString()}`;
-            }
-        }
-
-        function contactarAsesor() {
-            const area = document.getElementById('area-input').value || "0";
-            const lugarInput = document.getElementById('lugar-input');
-            const lugar = lugarInput.value.trim();
-            if(!lugar) {
-                lugarInput.classList.add('border-red-500'); lugarInput.focus();
-                setTimeout(() => lugarInput.classList.remove('border-red-500'), 1000);
-                alert("Por favor, ingrese la ubicación del proyecto antes de cotizar."); return;
-            }
-            const tipo = document.querySelector('input[name="tipo_diseno"]:checked').value;
-            const levantamiento = document.getElementById('info-levantada').checked ? "Sí" : "No";
-            const tipoTexto = tipo === 'estandar' ? "Diseño Estándar" : "Diseño Integral";
-            const precio = document.getElementById('calc-price-display').innerText;
-            let mapLink = "", areaNote = "";
-            if (polygonPoints.length > 0) {
-                let latSum = 0, lngSum = 0;
-                polygonPoints.forEach(p => { latSum += p.lat; lngSum += p.lng; });
-                const lat = (latSum/polygonPoints.length).toFixed(6);
-                const lng = (lngSum/polygonPoints.length).toFixed(6);
-                mapLink = `\n\n📍 *Ubicación Digitalizada:*\nhttps://maps.google.com/?q=${lat},${lng}`;
-                areaNote = " (Calculado con Mapa Interactivo)";
-            }
-            const finalMsg = `Hola EVA, deseo una cotización formal basada en la App Web.\n\n📋 *RESUMEN DEL PROYECTO:*\n• *Servicio:* ${tipoTexto}\n• *Levantamiento:* ${levantamiento}\n• *Ubicación:* ${lugar}\n• *Área:* ${area} km²${areaNote}\n\n💰 *Referencia Web:* ${precio}${mapLink}`;
-            window.open(`https://wa.me/51978649801?text=${encodeURIComponent(finalMsg)}`, '_blank');
-        }
-
-        // --- 4. MAPA DISEÑO ---
-        let map, polygonPoints = [], polygonLayer, markers = [], isDrawing = false, mapInitialized = false;
-        function toggleMap() {
-            const wrapper = document.getElementById('map-wrapper');
-            wrapper.classList.toggle('hidden');
-            if (!wrapper.classList.contains('hidden') && !mapInitialized) { initMap(); mapInitialized = true; }
-        }
-        function initMap() {
-            if (!map) {
-                map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-16.409, -71.537], 13);
-                L.control.zoom({ position: 'bottomright' }).addTo(map);
-                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' }).addTo(map);
-                document.getElementById('map-container').style.cursor = 'crosshair';
-                isDrawing = true;
-                map.on('click', onMapClick); map.on('contextmenu', undoLastPoint); map.on('dblclick', finishPolygon);
-            }
-        }
-        function onMapClick(e) {
-            if (!isDrawing) return;
-            polygonPoints.push(e.latlng);
-            const marker = L.circleMarker(e.latlng, { radius: 4, color: '#FCBF26', fillColor: '#fff', fillOpacity: 1 }).addTo(map);
-            markers.push(marker);
-            drawPolygon();
-        }
-        function drawPolygon() {
-            if (polygonLayer) map.removeLayer(polygonLayer);
-            if (polygonPoints.length > 0) {
-                polygonLayer = L.polygon(polygonPoints, { color: '#FCBF26', weight: 2, fillColor: '#FCBF26', fillOpacity: 0.2, dashArray: isDrawing ? '5, 5' : null }).addTo(map);
-            }
-            if (polygonPoints.length > 2) calculateArea(polygonPoints);
-        }
-        function undoLastPoint() {
-            if (polygonPoints.length > 0) {
-                polygonPoints.pop(); const lastMarker = markers.pop(); if (lastMarker) map.removeLayer(lastMarker);
-                drawPolygon();
-                if (polygonPoints.length < 3) document.getElementById('area-input').value = ''; else calculateArea(polygonPoints);
-                if (!isDrawing) { isDrawing = true; document.getElementById('map-container').style.cursor = 'crosshair'; }
-            }
-        }
-        function clearMap() {
-            polygonPoints = []; if (polygonLayer) map.removeLayer(polygonLayer);
-            markers.forEach(m => map.removeLayer(m)); markers = [];
-            document.getElementById('area-input').value = ''; isDrawing = true; document.getElementById('map-container').style.cursor = 'crosshair';
-        }
-        function finishPolygon() {
-            if (polygonPoints.length < 3) return;
-            isDrawing = false; document.getElementById('map-container').style.cursor = 'grab';
-            if (polygonLayer) map.removeLayer(polygonLayer);
-            polygonLayer = L.polygon(polygonPoints, { color: '#FCBF26', weight: 2, fillColor: '#FCBF26', fillOpacity: 0.4 }).addTo(map);
-            map.fitBounds(polygonLayer.getBounds(), { padding: [20, 20] });
-        }
-        function toRadians(deg) { return deg * Math.PI / 180; }
-        function calculateArea(latLngs) {
-            const earthRadius = 6378137; let area = 0;
-            if (latLngs.length > 2) {
-                for (let i = 0; i < latLngs.length; i++) {
-                    let p1 = latLngs[i], p2 = latLngs[(i + 1) % latLngs.length];
-                    area += toRadians(p2.lng - p1.lng) * (2 + Math.sin(toRadians(p1.lat)) + Math.sin(toRadians(p2.lat)));
-                }
-                area = Math.abs(area * earthRadius * earthRadius / 2.0);
-            }
-            const areaKm2 = (area / 1000000).toFixed(2);
-            document.getElementById('area-input').value = areaKm2;
-            if(parseFloat(areaKm2) > 0) calcularPresupuesto();
-        }
-
-        // =======================================================
-        // --- 5. LÓGICA ASISTENTE EXPEDIENTES (WIZARD) ---
-        // =======================================================
-        
-        let wizardData = {
-            requisitos: null,
-            info_completa: null,
-            postes: 0,
-            mecanico: null,
-            firma: null
-        };
-
-        function nextStep(n) {
-            // Validaciones
-            if(n === 2 && wizardData.requisitos === null) return;
-            if(n === 3 && wizardData.info_completa === null) return;
-            
-            // Ocultar paso actual y mostrar siguiente
-            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active-step'));
-            document.getElementById(`step-${n}`).classList.add('active-step');
-            
-            // Update Progress
-            updateProgressBar(n);
-
-            if(n === 3) setTimeout(() => { if(wizMap) wizMap.invalidateSize(); }, 200);
-        }
-
-        function prevStep(n) {
-            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active-step'));
-            document.getElementById(`step-${n}`).classList.add('active-step');
-            updateProgressBar(n);
-        }
-
-        function setWizardData(key, value) {
-            wizardData[key] = value;
-        }
-
-        function toggleWarningReq() {
-            const btn = document.getElementById('btn-no-req');
-            const warn = document.getElementById('warning-req');
-            
-            if (warn.classList.contains('hidden')) {
-                // Estado ACTIVO
-                btn.classList.add('bg-red-500/10', 'border-red-400');
-                warn.classList.remove('hidden');
-                // Desactivar el otro
-                setWizardData('requisitos', false);
-            } else {
-                // Estado INACTIVO (Si vuelve a pulsar)
-                btn.classList.remove('bg-red-500/10', 'border-red-400');
-                warn.classList.add('hidden');
-            }
-        }
-
-        function updateProgressBar(n) {
-            const pct = ((n - 1) / 4) * 100;
-            document.getElementById('progress-bar').style.width = `${pct}%`;
-            
-            for(let i=1; i<=5; i++) {
-                const dot = document.getElementById(`step-dot-${i}`);
-                if (i <= n) {
-                    dot.classList.remove('bg-[#161521]', 'text-gray-500', 'border-white/20');
-                    dot.classList.add('bg-[#FCBF26]', 'text-[#100F1D]', 'border-[#FCBF26]');
-                } else {
-                    dot.classList.add('bg-[#161521]', 'text-gray-500', 'border-white/20');
-                    dot.classList.remove('bg-[#FCBF26]', 'text-[#100F1D]', 'border-[#FCBF26]');
-                }
-            }
-        }
-
-        // Paso 3 Lógica (Postes Input vs Mapa)
-        let wizMap, wizPolylines = [], wizMarkers = [], activePolyline = null, wizMode = 'input';
-
-        function toggleWizPostesMode() {
-            const val = document.querySelector('input[name="wiz_postes_mode"]:checked').value;
-            wizMode = val;
-            if(val === 'input') {
-                document.getElementById('wiz-postes-input').classList.remove('hidden');
-                document.getElementById('wiz-postes-map').classList.add('hidden');
-            } else {
-                document.getElementById('wiz-postes-input').classList.add('hidden');
-                document.getElementById('wiz-postes-map').classList.remove('hidden');
-                setTimeout(initWizMap, 100);
-            }
-        }
-
-        function initWizMap() {
-            if(!wizMap) {
-                wizMap = L.map('wiz-map-container', { zoomControl: false, doubleClickZoom: false }).setView([-16.409, -71.537], 13);
-                L.control.zoom({ position: 'bottomright' }).addTo(wizMap);
-                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' }).addTo(wizMap);
-                document.getElementById('wiz-map-container').style.cursor = 'crosshair';
-                
-                // Eventos
-                wizMap.on('click', onWizMapClick);
-                wizMap.on('contextmenu', wizUndo); // Click derecho deshace último punto
-            }
-            wizMap.invalidateSize();
-        }
-
-        function onWizMapClick(e) {
-            // Si no hay línea activa, empezamos una nueva
-            if (!activePolyline) {
-                activePolyline = L.polyline([], { color: '#FCBF26', weight: 4 }).addTo(wizMap);
-                wizPolylines.push(activePolyline);
-            }
-            // Añadir punto
-            activePolyline.addLatLng(e.latlng);
-            // Marcador visual (guardamos referencia para borrarlo luego)
-            const m = L.circleMarker(e.latlng, { radius: 3, color: '#FCBF26', fillColor: '#fff', fillOpacity: 1 }).addTo(wizMap);
-            wizMarkers.push(m);
-            
-            calculateWizMapPostes();
-        }
-
-        function wizFinishLine() {
-            // "Soltar" la línea actual para que el siguiente clic inicie una nueva
-            activePolyline = null;
-        }
-
-        function wizUndo() {
-            // Deshacer el último punto GLOBALMENTE (más simple para el usuario)
-            // Lógica: borrar el último marcador y remover el último punto de la línea activa
-            
-            if (wizMarkers.length > 0) {
-                const lastMarker = wizMarkers.pop();
-                wizMap.removeLayer(lastMarker);
-            }
-
-            // Buscar la línea activa o la última línea creada
-            let targetLine = activePolyline;
-            if (!targetLine && wizPolylines.length > 0) {
-                targetLine = wizPolylines[wizPolylines.length - 1];
-            }
-
-            if (targetLine) {
-                const latlngs = targetLine.getLatLngs();
-                if (latlngs.length > 0) {
-                    latlngs.pop();
-                    targetLine.setLatLngs(latlngs);
-                    // Si la línea se queda vacía, la quitamos del array y del mapa
-                    if (latlngs.length === 0) {
-                        wizMap.removeLayer(targetLine);
-                        wizPolylines = wizPolylines.filter(l => l !== targetLine);
-                        activePolyline = null; // Reset activa
-                    } else {
-                        // Si borramos un punto pero quedan más, esa línea vuelve a ser la activa
-                        activePolyline = targetLine;
-                    }
-                }
-            }
-            calculateWizMapPostes();
-        }
-
-        function wizClear() {
-            wizPolylines.forEach(p => wizMap.removeLayer(p));
-            wizMarkers.forEach(m => wizMap.removeLayer(m));
-            wizPolylines = [];
-            wizMarkers = [];
-            activePolyline = null;
-            document.getElementById('wiz-map-result').innerHTML = "0";
-        }
-
-        function calculateWizMapPostes() {
-            let totalMeters = 0;
-            wizPolylines.forEach(p => {
-                const latlngs = p.getLatLngs();
-                for (let i = 0; i < latlngs.length - 1; i++) {
-                    totalMeters += latlngs[i].distanceTo(latlngs[i+1]);
-                }
-            });
-            const count = Math.ceil(totalMeters / 35);
-            document.getElementById('wiz-map-result').innerHTML = count;
-            wizardData.postes = count;
-        }
-
-        function validatePostesAndNext() {
-            if (wizMode === 'input') {
-                const val = document.getElementById('wiz-num-postes').value;
-                if (!val || val <= 0) { 
-                    // Animación error
-                    const inp = document.getElementById('wiz-num-postes');
-                    inp.classList.add('border-red-500'); setTimeout(()=>inp.classList.remove('border-red-500'), 1000);
-                    return; 
-                }
-                wizardData.postes = parseInt(val);
-            } else {
-                if (wizardData.postes <= 0) { alert("Dibuje al menos una ruta en el mapa"); return; }
-            }
-            nextStep(4);
-        }
-
-        // CÁLCULO FINAL Y RESULTADO
-        function showResult() {
-            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active-step'));
-            document.getElementById('wizard-result').classList.add('active-step');
-            
-            // Constantes (Mismo cálculo)
-            const PRICE_BASE_MIN = 500;
-            const PRICE_PER_POSTE = 5.2;
-            const PRICE_FIRMA = 500;
-            const PRICE_MECANICO = 500;
-            const COSTO_DIA_CAMPO = 220;
-            const KM_PER_DAY = 7;
-            const METERS_PER_POSTE = 35;
-
-            // 1. Costo Expediente
-            let costoPostesCalc = wizardData.postes * PRICE_PER_POSTE;
-            let costoExpediente = Math.max(PRICE_BASE_MIN, costoPostesCalc);
-
-            // 2. Levantamiento
-            let costoLevantamiento = 0;
-            if (wizardData.info_completa === false) {
-                const totalKm = (wizardData.postes * METERS_PER_POSTE) / 1000;
-                const diasCampo = Math.ceil(totalKm / KM_PER_DAY);
-                costoLevantamiento = (diasCampo || 1) * COSTO_DIA_CAMPO;
-            }
-
-            // 3. Mecánico
-            let costoMecanico = 0;
-            if (wizardData.mecanico === true) {
-                if (costoExpediente <= 2300) {
-                    costoMecanico = PRICE_MECANICO;
-                }
-            }
-
-            // 4. Firma
-            let costoFirma = wizardData.firma === true ? PRICE_FIRMA : 0;
-
-            const total = costoExpediente + costoLevantamiento + costoMecanico + costoFirma;
-            document.getElementById('wiz-total-display').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-            // Generar Lista Entregables
-            const listEl = document.getElementById('wiz-entregables-list');
-            let items = [];
-            
-            if(wizardData.info_completa === false) items.push("Levantamiento de información en campo");
-            items.push("Relación de postes con coordenadas UTM");
-            items.push("Memoria descriptiva");
-            items.push("Especificaciones técnicas");
-            items.push("Detalle de armados");
-            items.push("Planos de tendido");
-            if(wizardData.mecanico === true) items.push("Cálculo de esfuerzo mecánico");
-            if(wizardData.firma === true) items.push("Firma de Ing. Telecomunicaciones - Colegiado");
-            items.push("Entrega física del expediente");
-
-            listEl.innerHTML = items.map(item => `
-                <li class="flex items-start gap-2 text-[11px] text-gray-400">
-                    <i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5 shrink-0"></i> ${item}
-                </li>
-            `).join('');
-        }
-
-        function resetWizard() {
-            wizardData = { requisitos: null, info_completa: null, postes: 0, mecanico: null, firma: null };
-            document.getElementById('wiz-num-postes').value = '';
-            // Reset UI
-            document.getElementById('btn-no-req').classList.remove('bg-red-500/10', 'border-red-400');
-            document.getElementById('warning-req').classList.add('hidden');
-            wizClear();
-            
-            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active-step'));
-            document.getElementById('step-1').classList.add('active-step');
-            updateProgressBar(1);
-        }
-
-        function contactarWizard() {
-            const precio = document.getElementById('wiz-total-display').innerText;
-            
-            const msg = `Hola EVA, completé el asistente de *Expedientes Eléctricos*.\n\n📋 *RESUMEN:*\n` +
-                        `• Requisitos Claros: ${wizardData.requisitos ? 'Sí' : 'No'}\n` +
-                        `• Info Campo Completa: ${wizardData.info_completa ? 'Sí' : 'No'}\n` +
-                        `• Cant. Postes: ${wizardData.postes}\n` +
-                        `• Cálculo Mecánico: ${wizardData.mecanico ? 'Requerido' : 'No'}\n` +
-                        `• Firma Ing.: ${wizardData.firma ? 'Sí' : 'No'}\n` +
-                        `\n💰 *Referencia Web:* S/ ${precio}`;
-            
-            window.open(`https://wa.me/51978649801?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        // --- 6. CALCULADORA IMPLEMENTACIÓN (NUEVA) ---
-        function toggleImpNodoInput() {
-            const isChecked = document.getElementById('imp-check-nodo').checked;
-            const container = document.getElementById('imp-nodo-container');
-            if (isChecked) {
-                container.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-                document.getElementById('imp-nodos').value = ''; // Limpiar si se desmarca
-                calcImplementacion(); // Recalcular
-            }
-        }
-
-        function calcImplementacion() {
-            // Inputs
-            const km = parseFloat(document.getElementById('imp-km').value) || 0;
-            const naps = parseFloat(document.getElementById('imp-naps').value) || 0;
-            const mufas = parseFloat(document.getElementById('imp-mufas').value) || 0;
-            
-            // Nodos solo si está checkeado
-            let nodos = 0;
-            if (document.getElementById('imp-check-nodo').checked) {
-                nodos = parseFloat(document.getElementById('imp-nodos').value) || 0;
-            }
-
-            // Constantes Productividad (Diaria por cuadrilla)
-            const PROD_KM = 1.2;
-            const PROD_NAP = 6;
-            const PROD_MUFA = 2;
-
-            // Calcular días de trabajo neto (Laborales)
-            const workDaysNeeded = (km / PROD_KM) + (naps / PROD_NAP) + (mufas / PROD_MUFA);
-            
-            // Lógica Calendario (6 días laborales por semana)
-            let calendarDays = 0;
-            let sundays = 0;
-
-            if (workDaysNeeded > 0) {
-                const fullWeeks = Math.floor(workDaysNeeded / 6);
-                const remainingWork = workDaysNeeded % 6;
-
-                // Días calendario por semanas completas (7 días por semana)
-                calendarDays += fullWeeks * 7;
-                sundays += fullWeeks;
-
-                // Días calendario por el remanente
-                if (remainingWork > 0) {
-                    calendarDays += Math.ceil(remainingWork);
-                }
-            } else {
-                calendarDays = 0; 
-            }
-
-            // Costos Unitarios Diarios
-            const PER_FOOD = 40;
-            const PER_LODGE = 50;
-            const PER_SALARY = 100;
-            const TEAM_SIZE = 5;
-            const TEAM_MOBILITY = 30; // Por día (no domingos)
-
-            // Cálculos Costos P.Ext
-            const dailyCostPerson = PER_FOOD + PER_LODGE + PER_SALARY; // 190
-            const totalCostPersonnel = calendarDays * TEAM_SIZE * dailyCostPerson;
-
-            const mobilityDays = calendarDays - sundays;
-            const totalCostMobility = mobilityDays * TEAM_MOBILITY;
-
-            // Costos Planta Interna
-            const COST_MOUNT = 250;
-            const COST_CONFIG = 2000;
-            const totalCostPI = nodos * (COST_MOUNT + COST_CONFIG);
-
-            // Total Operativo
-            const totalOp = totalCostPersonnel + totalCostMobility + totalCostPI;
-
-            // Precio Final (+35%)
-            const finalPrice = totalOp * 1.35;
-
-            // Render
-            document.getElementById('res-dias-cal').innerText = `${calendarDays} Días`;
-            const barPct = Math.min((calendarDays / 60) * 100, 100);
-            document.getElementById('time-bar').style.width = `${barPct}%`;
-            
-            document.getElementById('imp-total-final').innerText = finalPrice.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        }
-
-        function contactarImplementacion() {
-            const finalPrice = document.getElementById('imp-total-final').innerText;
-            const km = document.getElementById('imp-km').value || 0;
-            const naps = document.getElementById('imp-naps').value || 0;
-            const mufas = document.getElementById('imp-mufas').value || 0;
-            const nodos = document.getElementById('imp-nodos').value || 0;
-            const days = document.getElementById('res-dias-cal').innerText;
-
-            let msg = `Hola EVA, deseo cotizar *Implementación de Red*.\n\n📋 *ALCANCE:*\n` +
-                        `• Fibra: ${km} km\n` +
-                        `• NAPs: ${naps} und\n` +
-                        `• Mufas: ${mufas} und\n`;
-            
-            if (nodos > 0) {
-                msg += `• Nodos: ${nodos} und (Incluye montaje y config)\n`;
-            }
-
-            msg += `• Tiempo Est.: ${days}\n` +
-                   `\n💰 *Inversión Estimada:* S/ ${finalPrice}`;
-            
-            window.open(`https://wa.me/51978649801?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        // --- 7. CALCULADORA ACTUALIZACIÓN (NUEVA) ---
-        function calcActualizacion() {
-            const km = parseFloat(document.getElementById('act-km').value) || 0;
-            const naps = parseFloat(document.getElementById('act-naps').value) || 0;
-            const mufas = parseFloat(document.getElementById('act-mufas').value) || 0;
-            const hilos = parseFloat(document.getElementById('act-hilos').value) || 0;
-            
-            // Check si tiene planos
-            const hasPlanos = document.getElementById('act-check-planos').checked;
-
-            // Productividad
-            // Si tiene planos: 0.3 días/km. Si NO tiene planos: 1.8 días/km.
-            const DAYS_PER_KM = hasPlanos ? 0.3 : 1.8; 
-            
-            const PROD_NAP = 8;
-            const PROD_MUFA = 4;
-            const PROD_HILOS = 24;
-
-            // Días Laborales Netos
-            const workDaysNeeded = (km * DAYS_PER_KM) + (naps / PROD_NAP) + (mufas / PROD_MUFA) + (hilos / PROD_HILOS);
-            
-            // Calendario (6 días laborales / semana)
-            let calendarDays = 0;
-            let sundays = 0;
-
-            if (workDaysNeeded > 0) {
-                const fullWeeks = Math.floor(workDaysNeeded / 6);
-                const remainingWork = workDaysNeeded % 6;
-                calendarDays += fullWeeks * 7;
-                sundays += fullWeeks;
-                if (remainingWork > 0) {
-                    calendarDays += Math.ceil(remainingWork);
-                }
-            } else {
-                calendarDays = 0;
-            }
-
-            // Costos
-            const PER_FOOD = 40;
-            const PER_LODGE = 50;
-            const PER_SALARY = 100;
-            const TEAM_SIZE = 5;
-            const TEAM_MOBILITY = 30; 
-
-            const dailyCostPerson = PER_FOOD + PER_LODGE + PER_SALARY; // 190
-            const totalCostPersonnel = calendarDays * TEAM_SIZE * dailyCostPerson;
-
-            const mobilityDays = calendarDays - sundays;
-            const totalCostMobility = mobilityDays * TEAM_MOBILITY;
-
-            const totalOp = totalCostPersonnel + totalCostMobility;
-            const finalPrice = totalOp * 1.35;
-
-            // Render
-            document.getElementById('act-dias-cal').innerText = `${calendarDays} Días`;
-            const barPct = Math.min((calendarDays / 60) * 100, 100);
-            document.getElementById('act-time-bar').style.width = `${barPct}%`;
-            
-            document.getElementById('act-total-final').innerText = finalPrice.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        }
-
-        function contactarActualizacion() {
-            const finalPrice = document.getElementById('act-total-final').innerText;
-            const km = document.getElementById('act-km').value || 0;
-            const naps = document.getElementById('act-naps').value || 0;
-            const mufas = document.getElementById('act-mufas').value || 0;
-            const hilos = document.getElementById('act-hilos').value || 0;
-            const days = document.getElementById('act-dias-cal').innerText;
-            const hasPlanos = document.getElementById('act-check-planos').checked ? "Sí" : "No";
-
-            const msg = `Hola EVA, deseo cotizar *Actualización de Red*.\n\n📋 *ALCANCE:*\n` +
-                        `• Planos Disponibles: ${hasPlanos}\n` +
-                        `• Fibra: ${km} km\n` +
-                        `• Hilos Troncal: ${hilos} und\n` +
-                        `• NAPs: ${naps} und\n` +
-                        `• Mufas: ${mufas} und\n` +
-                        `• Tiempo Est.: ${days}\n` +
-                        `\n💰 *Inversión Estimada:* S/ ${finalPrice}`;
-            
-            window.open(`https://wa.me/51978649801?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-    </script>
 </body>
 </html>
