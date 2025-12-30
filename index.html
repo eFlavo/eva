@@ -1,15 +1,2149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Eva - Soluciones Integrales</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Manrope:wght@300;400;600&family=Open+Sans:wght@300;400;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Iconos Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- LEAFLET MAPS (CSS) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <style>
+        /* --- BRANDING EVA DARK THEME --- */
+        :root {
+            --bg-main: #100F1D;      /* Azul Profundo Base */
+            --bg-deep: #0A0912;      /* Contraste Oscuro */
+            --bg-card: #161521;      /* Tarjetas */
+            --bg-footer: #050508;    /* Casi negro */
+            
+            --accent: #FCBF26;       /* Amarillo Dorado */
+            --text-main: #F3F4F6;
+            --text-muted: #9CA3AF;
+        }
+        
+        /* Ajuste de scroll en 0 ya que el menú se oculta */
+        html { scroll-padding-top: 0; }
+        
+        body { 
+            font-family: 'Open Sans', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, .font-heading, .logo-text { font-family: 'Montserrat', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Inputs Numéricos (Sin flechas) */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* --- NAV & HERO --- */
+        .nav-header {
+            background: rgba(16, 15, 29, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: transform 0.4s ease-in-out, background-color 0.3s;
+        }
+        
+        .readability-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;
+            background: radial-gradient(circle at center, rgba(16, 15, 29, 0.7) 0%, rgba(16, 15, 29, 0.0) 85%);
+            pointer-events: none;
+        }
+        .hero-content-layer { position: relative; z-index: 20; pointer-events: auto; }
+        
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-out forwards;
+        }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        #mobile-menu { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .menu-open { transform: translateX(0); }
+        .menu-closed { transform: translateX(100%); }
+
+        /* --- CANVAS BACKGROUNDS --- */
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; pointer-events: none; }
+        #hero-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .hero-content { position: relative; z-index: 10; pointer-events: none; }
+        .hero-content * { pointer-events: auto; }
+
+        /* --- BADGES NOSOTROS --- */
+        .badge-v-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            position: relative;
+            padding: 1rem 0;
+            height: 180px; 
+        }
+        
+        .static-badge-card {
+            background: rgba(252, 191, 38, 0.15); 
+            border: 1px solid var(--accent);       
+            border-radius: 1rem; 
+            padding: 1.2rem;
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+            backdrop-filter: blur(12px);
+            width: 140px; 
+            height: 140px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .badge-up { margin-top: 0; }
+        .badge-down {
+            margin-top: 4rem; 
+            margin-left: -20px; 
+            margin-right: -20px;
+        }
+        .badge-lifted {
+            margin-top: -2rem; 
+            margin-left: -20px;
+        }
+        
+        .z-top { z-index: 30; }
+        .z-mid { z-index: 20; }
+        .z-low { z-index: 10; }
+
+        .badge-icon { font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        /* --- TARJETA GPON-ISP --- */
+        .gpon-isp-card {
+            background: rgba(252, 191, 38, 0.15); 
+            border: 1px solid var(--accent);       
+            border-radius: 1.2rem; 
+            padding: 1.5rem 2rem;
+            text-align: center; 
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(12px);
+            width: auto; 
+            min-width: 240px; 
+            max-width: 320px;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        .gpon-isp-card:hover { transform: scale(1.02); }
+        
+        .gpon-text-wrapper { 
+            font-family: 'Montserrat', sans-serif; 
+            font-weight: 600; 
+            color: rgba(255,255,255,0.9); 
+            line-height: 1.4; 
+            font-size: 1.1rem; 
+        }
+        .hl-gpon-isp { color: var(--accent); font-weight: 800; font-size: 1.3rem; }
+
+        /* --- TARJETAS SOPHISTICATED --- */
+        .sophisticated-card {
+            background: #14141e; 
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-top: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 8px; 
+            padding: 3rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sophisticated-card::before {
+            content: '';
+            position: absolute;
+            top: 50%; 
+            left: 0; 
+            width: 4px; 
+            height: 0%; 
+            transform: translateY(-50%); 
+            background: var(--accent);
+            transition: height 0.4s ease;
+            opacity: 1;
+            z-index: 20;
+        }
+        
+        .sophisticated-card:hover {
+            transform: translateY(-5px);
+            background: #181825;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .sophisticated-card:hover::before { height: 100%; }
+        
+        .sophisticated-icon-bg {
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            font-size: 8rem; 
+            color: rgba(255,255,255,0.015); 
+            transform: rotate(-5deg);
+            pointer-events: none;
+            transition: all 0.5s ease;
+            z-index: 0;
+        }
+        .sophisticated-card:hover .sophisticated-icon-bg {
+            color: var(--accent);
+            opacity: 0.15; 
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        .card-header-flex {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .card-title-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.4rem; 
+            font-weight: 500; 
+            color: white;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .card-tag-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            padding-left: 10px; 
+        }
+
+        .card-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem; 
+            color: var(--accent);
+            border: 2px solid rgba(252, 191, 38, 0.6); 
+            padding: 10px 22px; 
+            border-radius: 8px;
+            font-weight: 900; 
+            background: rgba(252, 191, 38, 0.08);
+            box-shadow: 0 4px 15px rgba(252, 191, 38, 0.15);
+        }
+        
+        .card-separator {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .card-text-sophisticated {
+            color: #9CA3AF; 
+            font-size: 0.95rem;
+            line-height: 1.8; 
+            position: relative;
+            z-index: 10;
+            text-align: left;
+            font-weight: 300;
+        }
+        
+        .hl-phrase {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .card-actions {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-top: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sophisticated-link-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 20px;
+            border-radius: 6px;
+        }
+        .sophisticated-link-primary:hover { 
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border-color: rgba(255,255,255,0.4);
+            color: white; 
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .sophisticated-link-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            background: transparent;
+            border: 1px solid var(--accent);
+            padding: 12px 20px;
+            border-radius: 6px;
+        }
+        .sophisticated-link-secondary:hover { 
+            background: rgba(252, 191, 38, 0.15); 
+            backdrop-filter: blur(8px);
+            border-color: var(--accent);
+            color: var(--accent); 
+            box-shadow: 0 0 15px rgba(252, 191, 38, 0.2);
+            transform: translateY(-2px); 
+        }
+
+        /* --- ECOSISTEMA --- */
+        .ecosystem-section {
+            background: #0d0c15;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 6rem 0;
+            position: relative;
+        }
+        .ecosystem-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4rem;
+        }
+        @media (min-width: 1024px) { 
+            .ecosystem-grid { grid-template-columns: 1fr 1fr; gap: 6rem; } 
+            .eco-border-right { border-right: 1px solid rgba(255,255,255,0.05); padding-right: 4rem; }
+        }
+        .eco-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            color: white;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .eco-title span { color: var(--accent); }
+
+        .benefit-list { list-style: none; padding: 0; margin: 0; }
+        .benefit-item { display: flex; gap: 1.5rem; margin-bottom: 2rem; align-items: flex-start; }
+        .benefit-icon-box {
+            width: 50px; height: 50px; flex-shrink: 0;
+            background: rgba(252, 191, 38, 0.1);
+            border: 1px solid rgba(252, 191, 38, 0.3);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 1.5rem;
+        }
+        .benefit-content h4 { color: white; font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+        .benefit-content p { color: #9CA3AF; font-size: 0.9rem; line-height: 1.5; }
+        
+        .b2b-list-item { display: flex; gap: 1.5rem; margin-bottom: 2rem; align-items: flex-start; position: relative; }
+        .b2b-number {
+            font-family: 'JetBrains Mono', monospace; font-size: 2rem;
+            color: rgba(255, 255, 255, 0.1); font-weight: 800;
+            line-height: 1; position: absolute; left: 0; top: -5px; z-index: 1;
+        }
+        .b2b-item-content { position: relative; z-index: 2; padding-left: 3rem; }
+        .b2b-item-content h4 {
+            color: var(--accent); font-weight: 700; font-size: 1rem;
+            margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .b2b-item-content p { color: #9CA3AF; font-size: 0.9rem; line-height: 1.5; }
+
+        @keyframes highlightPulse {
+            0% { background-color: rgba(252, 191, 38, 0.0); box-shadow: 0 0 0 rgba(252,191,38,0); }
+            10% { background-color: rgba(252, 191, 38, 0.15); box-shadow: 0 0 30px rgba(252,191,38,0.2); border-radius: 12px; padding: 10px; margin: -10px; }
+            100% { background-color: rgba(252, 191, 38, 0.0); box-shadow: 0 0 0 rgba(252,191,38,0); border-radius: 12px; padding: 10px; margin: -10px; }
+        }
+        .highlight-flash { animation: highlightPulse 1.5s ease-out forwards; }
+
+        /* --- SERVICIOS FLIP CARDS --- */
+        .service-grid-layout { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
+        @media (min-width: 768px) { .service-grid-layout { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .service-grid-layout { grid-template-columns: repeat(3, 1fr); } .col-span-desk-2 { grid-column: span 2; } }
+
+        .flip-card { position: relative; height: 350px; width: 100%; cursor: pointer; perspective: 1000px; }
+        .flip-inner { position: relative; width: 100%; height: 100%; }
+        .card-face { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 1rem; transition: all 0.4s ease; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* DISEÑO DE TARJETA SERVICIOS (Originales) */
+        .card-front { 
+            z-index: 2; opacity: 1; transform: scale(1); align-items: center; justify-content: center; padding: 2rem; text-align: center; 
+            background-color: var(--bg-card); 
+            border: 1px solid rgba(243, 244, 246, 0.1); 
+        }
+        .card-highlight .card-front { 
+            background: rgba(252, 191, 38, 0.1); border: 1px solid #FCBF26; backdrop-filter: blur(12px); 
+        }
+        .card-silver .card-front { background: var(--bg-card); border: 1px solid #4B5563; }
+        
+        .card-back { z-index: 1; opacity: 0; transform: scale(0.95); padding: 1.2rem 1.5rem; align-items: flex-start; justify-content: flex-start; background: linear-gradient(145deg, #1C1B29 0%, #100F1D 100%); border: 1px solid var(--accent); }
+        
+        /* HOVER FIX IMPORTANTE */
+        .flip-card:hover .card-front { opacity: 0; transform: scale(1); pointer-events: none; }
+        .flip-card:hover .card-back { opacity: 1; transform: scale(1); z-index: 20; pointer-events: auto; }
+
+        .card-number { position: absolute; top: 15px; right: 25px; font-size: 4rem; font-weight: 900; color: rgba(255,255,255,0.03); font-family: 'Montserrat', sans-serif; line-height: 1; }
+        .circuit-lines { position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background-image: radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.03) 0%, transparent 70%); }
+        .front-content { position: relative; z-index: 10; width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .card-title-front { font-size: 1.25rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        .service-badge { 
+            background: var(--accent); color: var(--bg-main); 
+            font-size: 0.75rem; font-weight: 900; 
+            padding: 6px 14px; border-radius: 4px; 
+            margin-bottom: 1.5rem; box-shadow: 0 4px 10px rgba(252, 191, 38, 0.4);
+        }
+        
+        /* ETIQUETAS SUTILES FLOTANTES */
+        .segment-tag { 
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            background: transparent; border: none; box-shadow: none;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; 
+            letter-spacing: 0.2em; text-transform: uppercase;
+            opacity: 0.6; transition: opacity 0.3s ease;
+        }
+        .flip-card:hover .segment-tag { opacity: 1; }
+        .seg-isp { color: var(--accent); text-shadow: 0 0 10px rgba(252, 191, 38, 0.2); }
+        .seg-b2b { color: #9CA3AF; }
+        .seg-hybrid { color: #E5E7EB; opacity: 0.4; } 
+
+        .back-icon-small { position: absolute; top: 1.5rem; right: 1.5rem; font-size: 2.2rem; color: var(--accent); opacity: 0.8; }
+        .back-title { font-size: 1.5rem; font-weight: 800; color: white; margin-bottom: 0.1rem; line-height: 1; padding-right: 3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .back-synonym { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem; display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.3rem; width: 100%; }
+        .back-content-area { font-size: 14px; color: #FFFFFF; line-height: 1.5; flex-grow: 1; width: 100%; }
+        .back-list { list-style: none; padding: 0; margin: 0; font-size: 14px; color: #FFFFFF; }
+        .back-list li { padding-left: 1rem; position: relative; margin-bottom: 0.4rem; border-left: 2px solid #FCBF26; transition: 0.3s; }
+        .back-list li:hover { border-left-color: #fff; color: white; padding-left: 1.2rem; }
+        
+        .card-btn-container { display: flex; flex-direction: column; gap: 0.5rem; justify-content: flex-end; height: 100%; margin-top: 0; }
+
+        /* --- ESTILOS DE PROYECTOS (DESTACADOS) --- */
+        .vault-trigger {
+            /* ESTILO ANTERIOR ELIMINADO PARA USAR DISEÑO DE BOTÓN SENCILLO */
+        }
+        
+        .heartbeat-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(252,191,38,0) 20%, rgba(252,191,38,1) 50%, rgba(252,191,38,0) 80%, transparent 100%);
+            z-index: 20; opacity: 0.8; box-shadow: 0 0 4px rgba(252, 191, 38, 0.6); animation: pulseHeart 2s infinite ease-out;
+        }
+        @keyframes pulseHeart { 0% { opacity: 0.2; transform: scaleX(0.8); } 15% { opacity: 1; transform: scaleX(1); } 40% { opacity: 0.6; transform: scaleX(0.95); } 100% { opacity: 0.2; transform: scaleX(0.8); } }
+
+        .slide-card-container {
+            position: relative; width: 100%; height: 420px; border-radius: 12px; overflow: hidden;
+            border: 1px solid rgba(252, 191, 38, 0.3); background: var(--bg-card); box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: all 0.3s ease;
+        }
+        .slide-card-container:hover { box-shadow: 0 10px 30px rgba(252, 191, 38, 0.1); border-color: rgba(252, 191, 38, 0.6); }
+        
+        /* DISEÑO DE TARJETA PROYECTOS (FRONT - SOLIDO LIMPIO GRIS OSCURO) */
+        .card-layer-front { 
+            position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 10; transition: transform 0.5s cubic-bezier(0.2, 0, 0.2, 1), opacity 0.5s; 
+            
+            /* Fondo Sólido Contraste Sutil (Gris acero/azulado oscuro) */
+            background-color: #181820; 
+            
+            /* Bordes más resaltados */
+            border: 1px solid rgba(255, 255, 255, 0.12); 
+            box-shadow: 0 4px 25px rgba(0,0,0,0.4); 
+        }
+        /* Al hacer hover, resaltar el borde con el color accent */
+        .slide-card-container:hover .card-layer-front {
+            border-color: rgba(252, 191, 38, 0.3); 
+        }
+        
+        .card-layer-back { position: absolute; inset: 0; background: linear-gradient(to bottom, var(--bg-main), var(--bg-deep)); z-index: 20; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.2, 0, 0.2, 1); }
+        .slide-card-container:hover .card-layer-back { transform: translateY(0%); }
+        .slide-card-container:hover .card-layer-front { transform: translateY(-20%); opacity: 0.5; }
+        
+        .project-type-big { font-family: 'Montserrat', sans-serif; font-size: 3rem; font-weight: 900; color: rgba(255, 255, 255, 0.95); line-height: 1; text-transform: uppercase; text-align: center; text-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 2; }
+        .project-type-medium { font-family: 'Montserrat', sans-serif; font-size: 1.7rem; font-weight: 900; color: rgba(255, 255, 255, 0.95); line-height: 1.1; text-transform: uppercase; text-align: center; text-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 2; padding: 0 1rem; }
+        
+        /* UBICACIÓN */
+        .location-tag { 
+            font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.75rem; font-weight: 800; 
+            text-transform: uppercase; margin-top: 1rem; margin-bottom: 2rem;
+            background: rgba(0, 0, 0, 0.6); border: 1px solid var(--accent); padding: 6px 16px; border-radius: 4px; 
+            letter-spacing: 0.1em;
+        }
+        
+        /* COMPLEJIDAD (Técnica) */
+        .complexity-badge { 
+            position: absolute; top: 1.2rem; right: 1.2rem; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+            background: rgba(0,0,0,0.7); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
+        }
+        .comp-label { font-size: 0.55rem; color: #9CA3AF; text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; }
+        .stars-row { display: flex; gap: 3px; } .star-on { color: var(--accent); font-size: 0.7rem; } .star-off { color: rgba(255,255,255,0.1); font-size: 0.7rem; }
+        
+        /* ID BADGE (Estilo estampado abajo) */
+        .id-badge {
+            position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+            font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 4px; letter-spacing: 0.15em; font-weight: 700;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .back-content { padding: 2.5rem 2rem 1.5rem 2rem; flex-grow: 1; display: flex; flex-direction: column; border-bottom: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
+        .why-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--accent); text-transform: uppercase; font-weight: 800; margin-bottom: 0.5rem; flex-shrink: 0; }
+        .why-text-container { flex-grow: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 1rem; min-height: 0; }
+        .why-text { font-size: 0.95rem; color: #E5E7EB; line-height: 1.6; font-weight: 400; }
+        .client-meta-row { flex-shrink: 0; display: flex; justify-content: space-between; padding-top: 0.8rem; border-top: 1px dashed rgba(255,255,255,0.1); }
+        .client-item h4 { font-size: 0.6rem; color: #6B7280; text-transform: uppercase; font-weight: 700; margin-bottom: 1px; }
+        .client-item p { font-size: 0.8rem; color: white; font-family: 'JetBrains Mono', monospace; }
+        .back-bottom-section { flex-shrink: 0; background: rgba(255,255,255,0.02); padding: 1rem 2rem; }
+        
+        /* DATOS VERTICALES (LABEL ABAJO) */
+        .data-grid-compact { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .data-point { display: flex; flex-direction: column; justify-content: center; }
+        .data-point.text-right { align-items: flex-end; }
+        .data-val { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: white; font-weight: 700; line-height: 1.1; order: 1; }
+        .data-lbl { font-size: 0.6rem; color: #6B7280; text-transform: uppercase; margin-top: 4px; font-weight: 700; order: 2; }
+        
+        .prog-highlight { color: var(--accent); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+        /* --- MARQUEE --- */
+        .partners-section { position: relative; background: linear-gradient(180deg, var(--bg-deep) 0%, #15161C 100%); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4rem; padding-bottom: 3rem; overflow: hidden; }
+        .marquee-container { width: 100%; overflow: hidden; white-space: nowrap; position: relative; padding: 1rem 0; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); margin-bottom: 2rem; }
+        .marquee-track { display: inline-flex; gap: 2rem; animation: scroll 40s linear infinite; }
+        
+        /* SE ELIMINÓ EL PAUSE EN HOVER PARA QUE LA ANIMACIÓN SEA CONTINUA */
+        /* .marquee-track:hover { animation-play-state: paused; } */
+        
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* --- ESTILOS ADICIONALES DE PARTE_FINAL (MERGED) --- */
+        .fixed-partner-card {
+            position: relative; height: 160px; width: 260px;
+            background: #161620; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; 
+            display: inline-flex; flex-direction: column; overflow: hidden; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateZ(0);
+        }
+        .fixed-partner-card:hover { transform: translateY(-4px); background: #1c1c29; border-color: rgba(255, 255, 255, 0.6); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8); }
+        
+        .card-logo-area { height: 75%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; position: relative; z-index: 5; }
+        .logo-img { max-width: 85%; max-height: 80%; width: auto; height: auto; object-fit: contain; filter: grayscale(100%) opacity(0.5); transition: filter 0.4s ease, opacity 0.4s ease; transform: translateZ(0); }
+        .logo-zoom { transform: scale(1.35); }
+        .logo-lagos-effect { filter: brightness(0) invert(0.5) opacity(0.6) !important; }
+        .fixed-partner-card:hover .logo-lagos-effect { filter: brightness(0) invert(1) opacity(1) !important; }
+        .fixed-partner-card:hover .logo-img:not(.logo-lagos-effect) { filter: grayscale(0%) opacity(1); }
+        .logo-extra-text { display: none; margin-top: 10px; font-family: 'Montserrat', sans-serif; font-size: 0.6rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; line-height: 1.2; transition: color 0.3s ease; }
+        .fixed-partner-card:hover .logo-extra-text { display: block; color: white; }
+        
+        .card-text-area { height: 25%; width: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 1rem; border-top: none; position: relative; z-index: 5; }
+        .card-text-area::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 1px; background: rgba(255,255,255,0.1); transition: width 0.4s ease, background-color 0.4s ease; }
+        .fixed-partner-card:hover .card-text-area::before { width: 40px; background-color: #FFFFFF; }
+        .service-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #52525b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; transition: color 0.4s ease; margin: 0; }
+        .fixed-partner-card:hover .service-tag { color: #FFFFFF; }
+
+        /* --- TESTIMONIOS (ISP) --- */
+        .isp-quote-card {
+            position: relative; background: #12111a; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 1.5rem 1.5rem; 
+            display: flex; flex-direction: column; justify-content: flex-start; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); height: 200px; 
+        }
+        .isp-quote-card:hover { transform: translateY(-5px); background: #161521; border-color: rgba(252, 191, 38, 0.2); box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.3); }
+        .quote-body p { font-family: 'Open Sans', sans-serif; font-size: 0.85rem; line-height: 1.5; color: #E5E7EB; font-style: italic; font-weight: 300; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        .quote-body p::before { content: "“"; font-family: 'Montserrat', serif; font-size: 2.5rem; line-height: 0; vertical-align: -12px; color: var(--accent); opacity: 0.4; margin-right: 4px; }
+        .testimonial-slide { flex-shrink: 0; width: 100%; }
+        @media (min-width: 768px) { .testimonial-slide { width: calc(50% - 12px); } }
+        @media (min-width: 1024px) { .testimonial-slide { width: calc(33.333% - 16px); } }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    </style>
 </head>
-<body>
-    <h1>Welcome to My Website</h1>
-    <p>This is a sample paragraph to demonstrate a basic HTML structure.</p>
-    <a href="https://www.example.com">Visit Example.com</a>
-    
-    
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- FONDO GLOBAL -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- HEADER -->
+    <header id="main-header" class="fixed w-full z-50 transition-all duration-500 top-0 nav-header h-20">
+        <div class="container mx-auto h-full flex items-center justify-center relative px-6">
+            <nav class="hidden md:flex items-center gap-12">
+                <a href="#inicio" class="text-xs font-bold text-white hover:text-[#FCBF26] uppercase tracking-[0.15em] transition-colors py-2 border-b-2 border-transparent hover:border-[#FCBF26]">Inicio</a>
+                <a href="#nosotros" class="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-[0.15em] transition-colors py-2 border-b-2 border-transparent hover:border-white">Nosotros</a>
+                <a href="#servicios" class="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-[0.15em] transition-colors py-2 border-b-2 border-transparent hover:border-white">Servicios</a>
+                <a href="#proyectos" class="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-[0.15em] transition-colors py-2 border-b-2 border-transparent hover:border-white">Proyectos</a>
+                
+                <!-- NUEVOS BOTONES DIFERENCIADOS EN NUEVA PESTAÑA -->
+                <a href="cursos.html" target="_blank" class="ml-4 px-5 py-2 rounded border border-white/30 text-xs font-bold text-white uppercase tracking-widest hover:bg-white/10 transition-all">
+                    Cursos
+                </a>
+                <!-- BOTÓN COTIZADORES MODIFICADO EN NUEVA PESTAÑA -->
+                <a href="cotizador.html" target="_blank" class="px-5 py-2 rounded bg-white/10 text-white border border-white/20 text-xs font-bold uppercase tracking-widest hover:bg-[#FCBF26] hover:text-[#100F1D] hover:border-[#FCBF26] transition-all">
+                    Cotizadores
+                </a>
+            </nav>
+            <button id="mobile-btn" class="md:hidden absolute right-6 text-white text-2xl focus:outline-none hover:text-[#FCBF26] transition-colors">
+                <i class="ph-bold ph-list"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MENÚ MÓVIL -->
+    <div id="mobile-menu" class="fixed inset-y-0 right-0 w-64 z-50 bg-[#161521] border-l border-white/10 shadow-2xl flex flex-col pt-24 px-8 gap-6 menu-closed md:hidden">
+        <button id="close-menu" class="absolute top-6 right-6 text-white text-2xl hover:text-[#FCBF26]"><i class="ph-bold ph-x"></i></button>
+        <a href="#inicio" class="text-sm font-bold text-white hover:text-[#FCBF26] uppercase tracking-widest border-b border-white/5 pb-3" onclick="toggleMenu()">Inicio</a>
+        <a href="#nosotros" class="text-sm font-bold text-gray-400 hover:text-white uppercase tracking-widest border-b border-white/5 pb-3" onclick="toggleMenu()">Nosotros</a>
+        <a href="#servicios" class="text-sm font-bold text-gray-400 hover:text-white uppercase tracking-widest border-b border-white/5 pb-3" onclick="toggleMenu()">Servicios</a>
+        <a href="#proyectos" class="text-sm font-bold text-gray-400 hover:text-white uppercase tracking-widest border-b border-white/5 pb-3" onclick="toggleMenu()">Proyectos</a>
+        <!-- NUEVOS LINKS MOVIL EN NUEVA PESTAÑA -->
+        <a href="cursos.html" target="_blank" class="text-sm font-bold text-[#FCBF26] uppercase tracking-widest border-b border-white/5 pb-3">Cursos</a>
+        <!-- BOTÓN MÓVIL MODIFICADO EN NUEVA PESTAÑA -->
+        <a href="cotizador.html" target="_blank" class="text-sm font-bold text-white bg-white/10 border border-white/20 text-center py-3 rounded uppercase tracking-widest hover:bg-[#FCBF26] hover:text-[#100F1D] transition-all">Cotizadores</a>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section id="inicio" class="h-screen flex items-center justify-center relative overflow-hidden bg-[#100F1D] z-20">
+        <canvas id="hero-canvas"></canvas>
+        <div class="readability-overlay"></div>
+        <div class="hero-content-layer container mx-auto px-6 text-center">
+            <div class="hero-content max-w-5xl mx-auto flex flex-col items-center justify-center select-none">
+                <div class="relative w-full max-w-[280px] md:max-w-[500px] aspect-[3/1] flex items-center justify-center fade-in-up" style="animation-delay: 0.1s;">
+                     <img src="img/LOGO_eva.png" alt="EVA Soluciones" class="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(252,191,38,0.2)]" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                     <h1 class="hidden logo-text text-7xl md:text-[140px] leading-none text-white select-none mix-blend-overlay opacity-90">
+                        EV<span class="text-[#FCBF26]">A</span>
+                    </h1>
+                </div>
+                
+                <p class="text-[#FCBF26] font-extrabold tracking-[0.25em] uppercase text-sm md:text-xl mt-6 border-t border-white/30 pt-6 w-full max-w-2xl mx-auto fade-in-up" style="animation-delay: 0.3s;">
+                    INGENIERÍA EN TELECOMUNICACIONES
+                </p>
+
+                <h2 class="text-lg md:text-2xl mb-12 mt-8 leading-relaxed max-w-3xl mx-auto text-white font-normal tracking-wide font-heading fade-in-up" style="animation-delay: 0.5s;">
+                    Especialistas en Diseño, Implementación y Documentación de Redes FTTH
+                </h2>
+
+                <div class="flex flex-col md:flex-row gap-5 justify-center fade-in-up" style="animation-delay: 0.7s;">
+                    <a href="#servicios" class="relative overflow-hidden group bg-[#FCBF26]/20 backdrop-blur-md border border-[#FCBF26]/80 text-[#FCBF26] px-8 py-3.5 rounded-lg font-bold transition-all duration-300 hover:bg-[#FCBF26] hover:text-[#100F1D]">
+                        <span class="relative z-10">Explorar Servicios</span>
+                    </a>
+                    <a href="https://wa.me/51978649801" target="_blank" class="relative overflow-hidden group px-8 py-3.5 bg-white/5 backdrop-blur-md border border-white/30 text-white rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 hover:bg-white/20 hover:border-[#FCBF26] hover:shadow-[0_0_20px_rgba(252,191,38,0.2)]">
+                        <span class="relative z-10 flex items-center gap-2">
+                            <i class="ph-bold ph-whatsapp-logo text-xl text-[#FCBF26] group-hover:scale-110 transition-transform duration-300"></i> Hablemos
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NOSOTROS SECTION COMPLETA -->
+    <section id="nosotros" class="py-24 relative bg-[#100F1D]">
+        <div class="container mx-auto max-w-6xl px-6 relative z-10">
+            
+            <!-- PARTE 1: NUESTRA FILOSOFÍA (Texto Izq - Badges Der) -->
+            <div class="flex flex-col lg:flex-row gap-16 items-center mb-32">
+                <!-- TEXTO IZQUIERDA -->
+                <div class="lg:w-3/5 text-left">
+                    <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-sm mb-6 block flex items-center gap-2">
+                        <span class="w-8 h-[2px] bg-[#FCBF26]"></span> Nuestra Filosofía
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-8 leading-tight">
+                        Más que una empresa, somos tu <span class="font-bold text-[#FCBF26]">Socio de Ingeniería</span>.
+                    </h2>
+                    <p class="text-gray-400 leading-relaxed text-lg mb-4">
+                        "Más que un proveedor externo, funcionamos como la extensión experta de tu propia empresa. Combinamos soluciones de ingeniería robustas con un trato directo y transparente, asegurando que cada desafío técnico se resuelva con agilidad y compromiso personal."
+                    </p>
+                </div>
+
+                <!-- DERECHA: BADGES EN V MODIFICADA -->
+                <div class="lg:w-2/5 flex justify-center w-full">
+                    <div class="badge-v-container">
+                        <!-- Badge 1 (Back): 5 Años -->
+                        <div class="static-badge-card badge-up z-low">
+                            <i class="ph-fill ph-medal badge-icon"></i>
+                            <h3 class="font-bold text-white text-xl">+5 Años</h3>
+                            <p class="text-[10px] text-gray-300 uppercase tracking-widest font-bold">Experiencia</p>
+                        </div>
+                        <!-- Badge 2 (Middle): Latam Center -->
+                        <div class="static-badge-card badge-down z-mid">
+                            <i class="ph-fill ph-globe-hemisphere-west badge-icon"></i>
+                            <h3 class="font-bold text-white text-xl">LATAM</h3>
+                            <p class="text-[10px] text-gray-300 uppercase tracking-widest font-bold">Alcance</p>
+                        </div>
+                        <!-- Badge 3 (Front): Staff (Subida) -->
+                        <div class="static-badge-card badge-up badge-lifted z-top">
+                            <i class="ph-fill ph-users-three badge-icon"></i>
+                            <h3 class="font-bold text-white text-xl">Staff</h3>
+                            <p class="text-[10px] text-gray-300 uppercase tracking-widest font-bold">Ingenieros</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARTE 2: SOLUCIONES (Estructura Espejo: Texto Izq - GPON Der) -->
+            <div class="flex flex-col lg:flex-row gap-16 items-center mb-12">
+                
+                <!-- TEXTO IZQUIERDA -->
+                <div class="lg:w-3/5 text-left">
+                    <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-sm mb-4 block flex items-center gap-2">
+                        <span class="w-8 h-[2px] bg-[#FCBF26]"></span> NUESTRO ENFOQUE
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
+                        Soluciones a la medida de tu <span class="text-[#FCBF26]">modelo de negocio</span>.
+                    </h2>
+                    <p class="text-gray-400 text-lg leading-relaxed">
+                        "Desarrollamos soluciones especializadas bajo dos enfoques: la creación de redes para ISPs y el soporte operativo para empresas de telecomunicaciones."
+                    </p>
+                </div>
+
+                <!-- DERECHA: TARJETA GPON-ISP AMPLIA -->
+                <div class="lg:w-2/5 flex justify-center lg:justify-center w-full">
+                    <div class="gpon-isp-card">
+                        <i class="ph-bold ph-broadcast text-[#FCBF26] text-4xl mb-4"></i>
+                        <p class="gpon-text-wrapper">
+                            ¿Tienes una red <span class="hl-gpon-isp">GPON</span>?<br>
+                            Eres un <span class="hl-gpon-isp">ISP!</span>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- GRID DE TARJETAS (ISP + B2B) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                
+                <!-- Tarjeta 1: Llave en Mano -->
+                <div class="sophisticated-card group">
+                    <i class="ph-duotone ph-key sophisticated-icon-bg"></i>
+                    
+                    <div class="card-header-flex">
+                        <h3 class="card-title-text">Proyectos Llave en Mano</h3>
+                        <div class="card-tag-wrapper">
+                            <span class="card-tag">ISP</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-separator"></div>
+
+                    <p class="card-text-sophisticated">
+                        " <span class="hl-phrase">Transformamos tu inversión</span> en una infraestructura de fibra óptica lista para facturar. Nos encargamos de todo el ciclo técnico <span class="hl-phrase">—desde la ingeniería inicial hasta la puesta en marcha—</span> asegurando una red de alto desempeño, <span class="hl-phrase">preparada para evolucionar y escalar</span> al ritmo que tu proyecto demande."
+                    </p>
+                    
+                    <div class="card-actions">
+                        <!-- LINK CORREGIDO: Lleva a la sección de testimonios ISP -->
+                        <a href="#experiencias-isp" class="sophisticated-link-primary">
+                            Ver Experiencias <i class="ph-bold ph-arrow-right"></i>
+                        </a>
+                        <!-- ANCLAJE MODIFICADO: Con onclick para highlight -->
+                        <a href="#ruta-ingenieria" onclick="highlightSection('ruta-isp')" class="sophisticated-link-secondary">
+                            <i class="ph-bold ph-compass"></i> Por dónde se empieza
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2: B2B -->
+                <div class="sophisticated-card group">
+                    <i class="ph-duotone ph-handshake sophisticated-icon-bg"></i>
+                    
+                    <div class="card-header-flex">
+                        <h3 class="card-title-text">Ingeniería de Soporte</h3>
+                        <div class="card-tag-wrapper">
+                            <span class="card-tag">B2B</span>
+                        </div>
+                    </div>
+
+                    <div class="card-separator"></div>
+
+                    <p class="card-text-sophisticated">
+                        "Actuamos como tu <span class="hl-phrase">brazo operativo</span> de confianza para desahogar y escalar tus proyectos. <span class="hl-phrase">Nos integramos a tus estándares</span> para ejecutar diseños de detalle, expansiones de red y documentación técnica permanente, permitiéndote cumplir con tus cronogramas <span class="hl-phrase">sin saturar tus recursos internos</span>."
+                    </p>
+                    
+                    <div class="card-actions">
+                        <!-- LINK CORREGIDO: Lleva a la sección de Operadores Potenciados -->
+                        <a href="#operadores-potenciados" class="sophisticated-link-primary">
+                            Confían en Nosotros <i class="ph-bold ph-arrow-right"></i>
+                        </a>
+                         <!-- ANCLAJE MODIFICADO: Con onclick para highlight -->
+                        <a href="#ruta-ingenieria" onclick="highlightSection('ruta-b2b')" class="sophisticated-link-secondary">
+                            <i class="ph-bold ph-users-three"></i> Sinergia Operativa
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- NUEVA SECCIÓN: ECOSISTEMA DE INGENIERÍA -->
+    <section id="ruta-ingenieria" class="ecosystem-section">
+        <div class="container mx-auto max-w-6xl px-6 relative z-10">
+            
+            <div class="text-center mb-16">
+                <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-2 block">ECOSISTEMA DE INGENIERÍA</span>
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-white">El Valor de la Ingeniería</h2>
+            </div>
+
+            <div class="ecosystem-grid">
+                <!-- COLUMNA ISP -->
+                <div class="eco-border-right" id="ruta-isp">
+                    <h3 class="eco-title"><i class="ph-fill ph-map-trifold text-3xl"></i> EL VALOR DE UN DISEÑO PROFESIONAL <span>(ISP)</span></h3>
+                    <p class="text-gray-400 text-sm mb-8 leading-relaxed">
+                        Toda red GPON exitosa necesita un diseño inteligente. No es un gasto, es la base de tu rentabilidad.
+                    </p>
+                    
+                    <ul class="benefit-list">
+                        <li class="benefit-item">
+                            <div class="benefit-icon-box"><i class="ph-bold ph-coins"></i></div>
+                            <div class="benefit-content">
+                                <h4>Reducción de Inversión Inicial (CAPEX)</h4>
+                                <p>Un diseño preciso optimiza la ruta de fibra y materiales, evitando compras innecesarias y desperdicios en obra.</p>
+                            </div>
+                        </li>
+                        <li class="benefit-item">
+                            <div class="benefit-icon-box"><i class="ph-bold ph-warning-circle"></i></div>
+                            <div class="benefit-content">
+                                <h4>Minimización de Fallas</h4>
+                                <p>Prevenimos atenuaciones críticas y cuellos de botella antes de que ocurran, garantizando estabilidad desde el día uno.</p>
+                            </div>
+                        </li>
+                        <li class="benefit-item">
+                            <div class="benefit-icon-box"><i class="ph-bold ph-chart-line-up"></i></div>
+                            <div class="benefit-content">
+                                <h4>Escalabilidad Real</h4>
+                                <p>Proyectamos tu crecimiento. Tu red estará lista para ampliarse sin necesidad de reestructuraciones costosas.</p>
+                            </div>
+                        </li>
+                        <li class="benefit-item">
+                            <div class="benefit-icon-box"><i class="ph-bold ph-wrench"></i></div>
+                            <div class="benefit-content">
+                                <h4>Ahorro en Mantenimiento (OPEX)</h4>
+                                <p>Una red ordenada y bien documentada reduce drásticamente los tiempos y costos de reparación a largo plazo.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- COLUMNA B2B -->
+                <div id="ruta-b2b">
+                    <h3 class="eco-title"><i class="ph-fill ph-gear-fine text-3xl"></i> SINERGIA OPERATIVA <span>(B2B)</span></h3>
+                    <p class="text-gray-400 text-sm mb-8 leading-relaxed">
+                        Cuando la demanda supera tu capacidad instalada, EVA se convierte en tu motor de expansión.
+                    </p>
+
+                    <!-- Lista de Valor B2B (TEXTOS ACTUALIZADOS) -->
+                    <div class="mt-6">
+                        <div class="b2b-list-item">
+                            <span class="b2b-number">01</span>
+                            <div class="b2b-item-content">
+                                <h4>Lealtad Corporativa</h4>
+                                <p>Tus clientes siguen siendo tuyos. Trabajamos con total transparencia y ética, actuando como una extensión real de tu equipo sin interferir en tu relación comercial.</p>
+                            </div>
+                        </div>
+                        <div class="b2b-list-item">
+                            <span class="b2b-number">02</span>
+                            <div class="b2b-item-content">
+                                <h4>Velocidad de Reacción</h4>
+                                <p>Activamos células de diseño en 24 horas para absorber picos de trabajo por licitaciones o expansiones masivas.</p>
+                            </div>
+                        </div>
+                        <div class="b2b-list-item">
+                            <span class="b2b-number">03</span>
+                            <div class="b2b-item-content">
+                                <h4>Sinergia de Equipos</h4>
+                                <p>Homologamos cultura y procesos. Nuestros ingenieros se integran a tu ambiente laboral con calidad humana, fomentando una colaboración fluida y positiva.</p>
+                            </div>
+                        </div>
+                         <div class="b2b-list-item">
+                            <span class="b2b-number">04</span>
+                            <div class="b2b-item-content">
+                                <h4>Adaptabilidad a Procesos Singulares</h4>
+                                <p>Nos amoldamos a las exigencias particulares de cada empresa. Si requieres apoyo en procesos únicos o muy específicos, diseñamos una solución operativa a tu medida.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SERVICIOS SECTION -->
+    <section id="servicios" class="pt-24 pb-8 bg-[#0A0912] relative z-10 border-t border-white/5">
+        <div class="container mx-auto max-w-6xl px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-2 block">Flujo de Trabajo Integral</span>
+                <h2 class="text-3xl md:text-5xl font-bold text-white mb-2">Catálogo de Servicios</h2>
+                <!-- Línea Sutil Solicitada - AHORA MÁS LARGA -->
+                <div class="w-full max-w-2xl h-[1px] bg-gradient-to-r from-transparent via-[#FCBF26] to-transparent mx-auto my-6 opacity-70"></div>
+                <!-- TEXTO INTRODUCTORIO MODIFICADO -->
+                <p class="text-gray-400 text-sm max-w-2xl mx-auto leading-relaxed">
+                    Presentamos nuestros servicios estandarizados de ingeniería. Sin embargo, nuestro enfoque es inherentemente flexible: nos integramos a tus procesos singulares y resolvemos necesidades específicas más allá de este catálogo.
+                </p>
+            </div>
+
+            <!-- GRID INTERACTIVO -->
+            <div class="service-grid-layout mb-12">
+                
+                <!-- 1. DISEÑO HORIZONTAL -->
+                <div class="flip-card group col-span-desk-2 card-highlight">
+                    <div class="flip-inner">
+                        <!-- ADELANTE -->
+                        <div class="card-face card-front">
+                            <div class="card-number">01</div>
+                            <div class="circuit-lines"></div>
+                            <div class="front-content">
+                                <span class="service-badge">SERVICIO PRINCIPAL</span>
+                                <i class="ph-fill ph-map-trifold text-5xl text-white mb-4 group-hover:text-[#FCBF26] transition-colors duration-500"></i>
+                                <!-- TÍTULO CAMBIADO -->
+                                <h3 class="card-title-front">DISEÑO HORIZONTAL<br> GPON</h3>
+                            </div>
+                            <!-- TAG MODIFICADO -->
+                            <div class="segment-tag seg-isp">ISP</div>
+                        </div>
+                        <div class="card-face card-back relative">
+                            <!-- Header con flex-shrink-0 para evitar aplastamiento -->
+                            <div class="flex-shrink-0 w-full">
+                                <i class="ph-bold ph-map-trifold back-icon-small"></i>
+                                <h3 class="back-title">Diseño de Red & Ingeniería</h3>
+                                <span class="back-synonym">Procesos y Entregables</span>
+                            </div>
+                            
+                            <!-- GRID REDISEÑADO: 2 Columnas Estructuradas -->
+                            <!-- Quitamos h-full y usamos flex-grow para que ocupe espacio disponible sin desbordar -->
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 w-full mt-2 flex-grow overflow-hidden">
+                                <!-- Columna Izquierda: Estudio, Levantamiento, Digital -->
+                                <div class="flex flex-col gap-2">
+                                    <div>
+                                        <!-- TEXTO AUMENTADO A 14px -->
+                                        <h4 class="text-[#FCBF26] font-bold text-[14px] uppercase mb-0.5 flex items-center gap-1.5"><span class="w-[2px] h-[10px] bg-[#FCBF26] inline-block mr-1"></span> Estudio</h4>
+                                        <p class="text-white text-[14px] leading-snug">Se establecen los criterios base para el diseño, estructura de red, porcentaje de cobertura, tipos y niveles de splitteo.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[#FCBF26] font-bold text-[14px] uppercase mb-0.5 flex items-center gap-1.5"><span class="w-[2px] h-[10px] bg-[#FCBF26] inline-block mr-1"></span> Levantamiento</h4>
+                                        <p class="text-white text-[14px] leading-snug">Gepeo de toda la postería existente en campo y caracterización predial.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[#FCBF26] font-bold text-[14px] uppercase mb-0.5 flex items-center gap-1.5"><span class="w-[2px] h-[10px] bg-[#FCBF26] inline-block mr-1"></span> Digital</h4>
+                                        <p class="text-white text-[14px] leading-snug">Entrega de planos PDF y editables en AutoCad, KMZ y ArcGis.</p>
+                                    </div>
+                                </div>
+                                <!-- Columna Derecha: Topología, Materiales + Botones -->
+                                <div class="flex flex-col h-full">
+                                    <div class="mb-2">
+                                        <h4 class="text-[#FCBF26] font-bold text-[14px] uppercase mb-0.5 flex items-center gap-1.5"><span class="w-[2px] h-[10px] bg-[#FCBF26] inline-block mr-1"></span> Topología</h4>
+                                        <p class="text-white text-[14px] leading-snug">Diagramas de empalme, presupuesto óptico y capacidad de red.</p>
+                                    </div>
+                                    <div class="mb-auto">
+                                        <h4 class="text-[#FCBF26] font-bold text-[14px] uppercase mb-0.5 flex items-center gap-1.5"><span class="w-[2px] h-[10px] bg-[#FCBF26] inline-block mr-1"></span> Materiales</h4>
+                                        <p class="text-white text-[14px] leading-snug">BOM completo y cálculo CAPEX.</p>
+                                    </div>
+                                    
+                                    <!-- Botones integrados al final de la columna derecha - MÁS COMPACTOS -->
+                                    <div class="flex flex-col gap-2 mt-auto relative z-50 pt-2">
+                                        <!-- BOTONES: Se mantienen compactos para dar espacio al texto más grande. En nueva pestaña si es un PDF o herramienta -->
+                                        <a href="#" target="_blank" class="sophisticated-link-primary w-full text-center !py-1.5 !px-2 !text-[10px]"><i class="ph-bold ph-download-simple text-sm"></i> Brochure</a>
+                                        <a href="#" target="_blank" class="sophisticated-link-secondary w-full text-center !py-1.5 !px-2 !text-[10px]"><i class="ph-bold ph-calculator text-sm"></i> Cotizador</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. DISEÑO VERTICAL -->
+                <div class="flip-card group">
+                    <div class="flip-inner">
+                        <div class="card-face card-front">
+                            <div class="card-number">02</div>
+                            <div class="circuit-lines"></div>
+                            <div class="front-content">
+                                <i class="ph-fill ph-buildings text-5xl text-white mb-6 group-hover:text-[#FCBF26] transition-colors duration-500"></i>
+                                <h3 class="card-title-front">DISEÑO<br>VERTICAL</h3>
+                            </div>
+                            <!-- TAG MODIFICADO -->
+                            <div class="segment-tag seg-b2b">B2B</div>
+                        </div>
+                        <div class="card-face card-back relative">
+                            <i class="ph-bold ph-buildings back-icon-small"></i>
+                            <h3 class="back-title">Interiores</h3>
+                            <span class="back-synonym">Entregables Técnicos</span>
+                            <div class="back-content-area">
+                                <p class="text-white text-[14px] leading-relaxed mb-4">Implementamos soluciones <strong>FTTR (Fiber To The Room)</strong> para garantizar velocidad gigabit real.</p>
+                                <ul class="back-list text-[14px]">
+                                    <li>Ruta de acceso a planta.</li>
+                                    <li>Diseño de montantes.</li>
+                                    <li>Distribución detallada por piso.</li>
+                                    <li>Reporte fotográfico.</li>
+                                    <li>Planos As-Built.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. EXPEDIENTE -->
+                <div class="flip-card group card-silver">
+                    <div class="flip-inner">
+                        <div class="card-face card-front">
+                            <div class="card-number">03</div>
+                            <div class="circuit-lines"></div>
+                            <div class="front-content">
+                                <i class="ph-fill ph-lightning text-5xl text-white mb-6 group-hover:text-[#FCBF26] transition-colors duration-500"></i>
+                                <h3 class="card-title-front">EXPEDIENTE PARA<br>EMPRESAS ELECTRICAS</h3>
+                            </div>
+                            <!-- TAG MODIFICADO -->
+                            <div class="segment-tag seg-hybrid">ISP | B2B</div>
+                        </div>
+                        <div class="card-face card-back relative">
+                            <i class="ph-bold ph-lightning back-icon-small"></i>
+                            <h3 class="back-title">Regularización<br>de Red</h3>
+                            <span class="back-synonym">Entregables</span>
+                            <div class="back-content-area">
+                                <p class="text-white text-[14px] leading-relaxed mb-4">Desarrollamos tu expediente en base a lo solicitado por la empresa propietaria.</p>
+                                <ul class="back-list text-[14px]">
+                                    <li>Planos de tendido.</li>
+                                    <li>Relación de postes.</li>
+                                    <li>Cálculos justificativos.</li>
+                                    <li>Detalle de armados.</li>
+                                    <li>Memoria descriptiva.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. PERMISOS -->
+                <div class="flip-card group">
+                    <div class="flip-inner">
+                        <div class="card-face card-front">
+                            <div class="card-number">04</div>
+                            <div class="circuit-lines"></div>
+                            <div class="front-content">
+                                <i class="ph-fill ph-bank text-5xl text-white mb-6 group-hover:text-[#FCBF26] transition-colors duration-500"></i>
+                                <h3 class="card-title-front">PERMISOS<br>MUNICIPALES</h3>
+                            </div>
+                            <!-- TAG MODIFICADO -->
+                            <div class="segment-tag seg-hybrid">ISP | B2B</div>
+                        </div>
+                        <div class="card-face card-back relative">
+                            <i class="ph-bold ph-bank back-icon-small"></i>
+                            <h3 class="back-title">Evita<br>Fiscalizaciones</h3>
+                            <span class="back-synonym">Licencias y Normativa</span>
+                            <div class="back-content-area">
+                                <ul class="back-list text-[14px]">
+                                    <li>Plano de ubicación.</li>
+                                    <li>Memoria descriptiva.</li>
+                                    <li>FUIIT.</li>
+                                    <li>Plan de seguridad.</li>
+                                    <li>Gestión de obras civiles.</li>
+                                    <!-- <li>Trámites municipales.</li> -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. IMPLEMENTACION -->
+                <div class="flip-card group card-silver">
+                    <div class="flip-inner">
+                        <div class="card-face card-front">
+                            <div class="card-number">05</div>
+                            <div class="circuit-lines"></div>
+                            <div class="front-content">
+                                <i class="ph-fill ph-hard-hat text-5xl text-white mb-6 group-hover:text-[#FCBF26] transition-colors duration-500"></i>
+                                <h3 class="card-title-front">IMPLEMENTACION<br>DE RED</h3>
+                            </div>
+                            <!-- TAG MODIFICADO -->
+                            <div class="segment-tag seg-hybrid">ISP | B2B</div>
+                        </div>
+                        <div class="card-face card-back relative">
+                            <i class="ph-bold ph-hard-hat back-icon-small"></i>
+                            <h3 class="back-title">Del Plano<br>a la Realidad</h3>
+                            <span class="back-synonym">Construcción y Despliegue</span>
+                            <div class="back-content-area">
+                                <p class="text-white text-[14px] leading-relaxed mb-4">Nos encargamos de todo el despliegue de planta interna y externa.</p>
+                                <ul class="back-list text-[14px]">
+                                    <li>Tendido de fibra óptica.</li>
+                                    <li>Acondicionamiento de NAPs.</li>
+                                    <li>Instalación de Mufas.</li>
+                                    <li>Armado de gabinetes.</li>
+                                    <li>Configuración de equipos.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. ACTUALIZACION -->
+                <div class="flip-card group">
+                    <div class="flip-inner">
+                        <div class="card-face card-front">
+                            <div class="card-number">06</div>
+                            <div class="circuit-lines"></div>
+                            <div class="front-content">
+                                <i class="ph-fill ph-arrows-clockwise text-5xl text-white mb-6 group-hover:text-[#FCBF26] transition-colors duration-500"></i>
+                                <h3 class="card-title-front">ACTUALIZACION<br>DE RED</h3>
+                            </div>
+                            <!-- TAG MODIFICADO -->
+                            <div class="segment-tag seg-hybrid">ISP | RED92</div>
+                        </div>
+                        <div class="card-face card-back relative">
+                            <i class="ph-bold ph-arrows-clockwise back-icon-small"></i>
+                            <h3 class="back-title">¿Tu red se ha<br>desactualizado?</h3>
+                            <span class="back-synonym">Ingeniería As-Built</span>
+                            <div class="back-content-area">
+                                <p class="text-white text-[14px] leading-relaxed mb-4">Realizamos un relevamiento integral de toda tu red.</p>
+                                <ul class="back-list text-[14px]">
+                                    <li>Auditoría de infraestructura.</li>
+                                    <li>Corrección de diagramas.</li>
+                                    <li>Planos As-Built.</li>
+                                    <li>Estado de fibra óptica.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. DOCUMENTACION -->
+                <div class="flip-card group col-span-desk-2 card-highlight">
+                    <div class="flip-inner">
+                        <div class="card-face card-front">
+                            <div class="card-number">07</div>
+                            <div class="circuit-lines"></div>
+                            <div class="front-content">
+                                <span class="service-badge">SERVICIO PRINCIPAL</span>
+                                <i class="ph-fill ph-files text-5xl text-white mb-4 group-hover:text-[#FCBF26] transition-colors duration-500"></i>
+                                <!-- Título Cambiado -->
+                                <h3 class="card-title-front">DOCUMENTACION<br>DE RED</h3>
+                            </div>
+                            <!-- TAG MODIFICADO: Ahora usa seg-isp (Dorado) en vez de seg-red92 (Rojo) -->
+                            <div class="segment-tag seg-isp">ISP | RED92</div>
+                        </div>
+                        <div class="card-face card-back relative">
+                            <!-- Header con shrink-0 -->
+                            <div class="flex-shrink-0 w-full">
+                                <i class="ph-bold ph-files back-icon-small"></i>
+                                <h3 class="back-title">Gestión de Red</h3>
+                                <span class="back-synonym">Orden y Control Total y Permanente</span>
+                            </div>
+                            
+                            <p class="text-white text-[14px] leading-relaxed mb-4 w-full flex-shrink-0">Seremos tu propio equipo de diseño. Mantendremos actualizada la información de tu red permanentemente.</p>
+                            
+                            <div class="grid grid-cols-2 gap-x-6 w-full mb-4 flex-grow overflow-hidden">
+                                <div class="col-span-1">
+                                    <h4 class="text-[#FCBF26] font-bold text-[14px] uppercase mb-2 border-b border-white/10 pb-1">Digitalización Inicial</h4>
+                                    <ul class="back-list text-[14px]">
+                                        <li>Revisión de información.</li>
+                                        <li>Normalización.</li>
+                                        <li>Importación a ArcGIS / KMZ.</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-1">
+                                    <h4 class="text-[#FCBF26] font-bold text-[14px] uppercase mb-2 border-b border-white/10 pb-1">Operación Diaria</h4>
+                                    <ul class="back-list text-[14px]">
+                                        <li>Actualización permanente.</li>
+                                        <li>Gestión de averías.</li>
+                                        <li>Control de clientes.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-auto w-full pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 flex-shrink-0">
+                                <p class="text-gray-400 text-xs italic leading-tight max-w-[60%]">Estamos en desarrollo de una nueva plataforma de gestión integral de redes de fibra óptica.</p>
+                                <!-- BOTÓN CORREGIDO: Menor tamaño para no cortar contenido -->
+                                <a href="#" class="sophisticated-link-secondary whitespace-nowrap !py-1.5 !px-3 !text-[11px]">Conoce a RED92</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SECCIÓN DE ADAPTABILIDAD (Full Width) - EXISTENTE -->
+            <div class="w-full bg-[#161521] border border-[#FCBF26]/30 rounded-lg p-8 relative overflow-hidden group mb-6">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-[#FCBF26]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div class="text-left max-w-2xl">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="ph-fill ph-puzzle-piece text-[#FCBF26] text-2xl"></i>
+                            <h3 class="text-xl font-bold text-white uppercase tracking-widest">Servicio Personalizado</h3>
+                        </div>
+                        <p class="text-gray-300 text-sm leading-relaxed">
+                            ¿Tu proyecto requiere un enfoque distinto? La <span class="text-[#FCBF26] font-bold">adaptabilidad</span> es nuestro servicio transversal. Diseñamos flujos de trabajo a la medida para integrarnos perfectamente a tu operación.
+                        </p>
+                    </div>
+                    
+                    <div class="flex flex-col items-center md:items-end gap-3 text-center md:text-right shrink-0">
+                        <span class="text-gray-400 text-[11px] font-bold uppercase tracking-widest opacity-80">
+                            ¿Tienes un requerimiento singular?
+                        </span>
+                        <a href="https://wa.me/51978649801" target="_blank" class="whitespace-nowrap px-8 py-3 bg-[#FCBF26]/10 border border-[#FCBF26] text-[#FCBF26] font-bold uppercase text-xs tracking-widest rounded hover:bg-[#FCBF26] hover:text-[#100F1D] transition-all duration-300 shadow-[0_0_15px_rgba(252,191,38,0.1)] hover:shadow-[0_0_25px_rgba(252,191,38,0.4)] flex items-center justify-center gap-2 group-btn">
+                            <i class="ph-bold ph-whatsapp-logo text-lg group-hover:scale-110 transition-transform"></i> Escríbenos
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- NUEVA SECCIÓN COTIZADOR TIPO FRANJA FULL-WIDTH (ESTILO PROYECTOS ANTIGUO) -->
+    <section class="bg-[#151621] border-y border-[#FCBF26]/20 py-10 relative overflow-hidden transition-all duration-500 hover:bg-[#1A1B29] group">
+        <!-- Decoración Sutil -->
+        <div class="absolute top-0 left-0 w-2 h-full bg-[#FCBF26] shadow-[0_0_20px_rgba(252,191,38,0.6)]"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#FCBF26]/5 to-transparent opacity-50 pointer-events-none"></div>
+
+        <div class="container mx-auto max-w-6xl px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            
+            <!-- Texto Izquierda -->
+            <div class="flex items-center gap-6">
+                 <i class="ph-duotone ph-calculator text-5xl text-[#FCBF26] opacity-80"></i>
+                 <div class="text-left">
+                    <h2 class="text-2xl md:text-3xl font-heading text-white font-bold tracking-tight mb-1">
+                        LO HACEMOS <span class="text-[#FCBF26]">FÁCIL</span>
+                    </h2>
+                    <p class="text-sm text-gray-400 font-normal leading-relaxed max-w-lg">
+                        Olvídate de las esperas. Usa nuestra <strong class="text-white">Calculadoras personalizadas para cotizar cada uno de nuestros servicios</strong> y obtén una estimación de inversión para tu proyecto en segundos.
+                    </p>
+                 </div>
+            </div>
+
+            <!-- Botón Derecha EN NUEVA PESTAÑA -->
+            <div class="shrink-0">
+                 <a href="cotizador.html" target="_blank" class="group relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-bold text-white transition-all duration-300 bg-transparent rounded border border-[#FCBF26] hover:bg-[#FCBF26]/10 hover:shadow-[0_0_20px_rgba(252,191,38,0.3)]">
+                    <span class="uppercase tracking-widest text-xs group-hover:text-[#FCBF26] transition-colors flex items-center gap-2">
+                        Calcular Ahora <i class="ph-bold ph-caret-right text-lg"></i>
+                    </span>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- PROYECTOS DESTACADOS (REDISEÑO DE ESTRUCTURA) -->
+    <section id="proyectos" class="bg-[#100F1D] pt-24 pb-12 relative transition-all duration-500 border-t border-white/5">
+        
+        <!-- ENCABEZADO DE SECCIÓN ESTÁNDAR -->
+        <div class="container mx-auto max-w-6xl px-6 text-center mb-10">
+            <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-sm mb-2 block">NUESTRA EXPERIENCIA EN CAMPO</span>
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-2">Proyectos Destacados</h2>
+            
+            <!-- Línea Divisoria -->
+            <div class="w-full max-w-2xl h-[1px] bg-gradient-to-r from-transparent via-[#FCBF26] to-transparent mx-auto my-6 opacity-70"></div>
+            
+            <!-- Texto Descriptivo (Movido del Vault) -->
+             <p class="text-gray-400 text-sm md:text-base max-w-3xl mx-auto leading-relaxed">
+                Cada proyecto es el resultado de una sinergia precisa entre software especializado como 
+                <span class="prog-highlight">ArcGIS</span>, 
+                <span class="prog-highlight">AutoCAD</span> y 
+                <span class="prog-highlight">Google Earth</span>. 
+                A través de una conversación constante con el cliente final, transformamos datos crudos en un producto de calidad superior.
+            </p>
+        </div>
+
+        <!-- TRIGGER (BOTÓN BARRA SENCILLA) -->
+        <div class="container mx-auto max-w-6xl px-6 relative z-20">
+            <div id="projects-trigger" onclick="togglePortfolio()" class="mx-auto w-full max-w-xl bg-[#1A1B29] border border-[#FCBF26] shadow-[0_0_15px_rgba(252,191,38,0.1)] hover:shadow-[0_0_25px_rgba(252,191,38,0.3)] hover:bg-[#FCBF26]/10 rounded-lg cursor-pointer transition-all duration-300 group py-4 px-6 flex items-center justify-between">
+                
+                <span class="text-white font-bold text-sm uppercase tracking-widest transition-colors">
+                    Ver Proyectos
+                </span>
+                
+                <div class="bg-[#FCBF26]/10 text-[#FCBF26] w-8 h-8 rounded-full flex items-center justify-center border border-[#FCBF26]/30 group-hover:bg-[#FCBF26] group-hover:text-[#100F1D] transition-all duration-300">
+                     <i id="trigger-icon" class="ph-bold ph-caret-down text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENIDO DEL VAULT (TARJETAS RESTAURADAS DE DESTACADOS.HTML) -->
+        <div id="projects-vault" class="hidden opacity-0 transform translate-y-[-20px] transition-all duration-700 ease-in-out bg-[#100F1D] relative z-10">
+            <div class="container mx-auto max-w-6xl px-6 py-16">
+                
+                <!-- GRID 1: BLOQUE PRINCIPAL (Restaurado) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                    
+                    <!-- === PROYECTO 01 (JULIACA) === -->
+                    <div class="slide-card-container group">
+                        <div class="card-layer-front">
+                            <div class="complexity-badge">
+                                <span class="comp-label">COMPLEJIDAD</span>
+                                <div class="stars-row"><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i></div>
+                            </div>
+                            <h3 class="project-type-big">RED<br>XGPON</h3>
+                            <div class="location-tag"><i class="ph-fill ph-map-pin mr-1"></i> JULIACA, PERÚ</div>
+                            <div class="id-badge">ID: PRJ-2304</div>
+                        </div>
+                        <div class="card-layer-back">
+                            <div class="back-content">
+                                <span class="why-label">DESAFÍO Y SOLUCIÓN</span>
+                                <div class="why-text-container">
+                                    <p class="why-text">
+                                        Ante la magnitud del área de cobertura (51km²), se diseñó una topología híbrida de Anillo y Árbol para interconectar 4 nodos principales con troncales de 144 hilos. Se combinó topología anillo y tipo árbol para las ramificaciones; el equipo trabajó durante meses para entregar este proyecto que beneficia a un promedio de 30,000 usuarios.
+                                    </p>
+                                </div>
+                                <div class="client-meta-row">
+                                    <div class="client-item"><h4>Cliente</h4><p>CONECTO COMPANY TELECOM</p></div>
+                                    <div class="client-item text-right"><h4>Entrega</h4><p>Abr 2023</p></div>
+                                </div>
+                            </div>
+                            <div class="back-bottom-section">
+                                <div class="data-grid-compact">
+                                    <div class="data-point"><span class="data-val">51<small>km²</small></span><span class="data-lbl">Área Cubierta</span></div>
+                                    <div class="data-point text-right"><span class="data-val">+500<small>km</small></span><span class="data-lbl">Fibra Proyectada</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- === PROYECTO 02 (ATACAMA) === -->
+                    <div class="slide-card-container group">
+                        <div class="card-layer-front">
+                            <div class="complexity-badge">
+                                <span class="comp-label">COMPLEJIDAD</span>
+                                <div class="stars-row"><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-off"></i><i class="ph-fill ph-star star-off"></i></div>
+                            </div>
+                            <h3 class="project-type-big">RED<br>GPON</h3>
+                            <div class="location-tag"><i class="ph-fill ph-map-pin mr-1"></i> ATACAMA, CHILE</div>
+                            <div class="id-badge">ID: PRJ-2206</div>
+                        </div>
+                        <div class="card-layer-back">
+                            <div class="back-content">
+                                <span class="why-label">DESAFÍO Y SOLUCIÓN</span>
+                                <div class="why-text-container">
+                                    <p class="why-text">
+                                        Como nuestro primer cliente internacional, se realizó una adaptación integral a la normativa técnica y regulatoria chilena. El proyecto exigió homologación de estándares de ferretería, gestión de permisos con empresas eléctricas locales y adecuación de procedimientos de despliegue a una geografía desértica distinta a la habitual.
+                                    </p>
+                                </div>
+                                <div class="client-meta-row">
+                                    <div class="client-item"><h4>Cliente</h4><p>HOSTNAME S.A.C.</p></div>
+                                    <div class="client-item text-right"><h4>Entrega</h4><p>Jun 2022</p></div>
+                                </div>
+                            </div>
+                            <div class="back-bottom-section">
+                                <div class="data-grid-compact">
+                                    <div class="data-point"><span class="data-val">1er<small>Intl</small></span><span class="data-lbl">Cliente Exterior</span></div>
+                                    <div class="data-point text-right"><span class="data-val">4,000</span><span class="data-lbl">Usuarios</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- === PROYECTO 03 (TRUJILLO) === -->
+                    <div class="slide-card-container group">
+                        <div class="card-layer-front">
+                            <div class="complexity-badge">
+                                <span class="comp-label">COMPLEJIDAD</span>
+                                <div class="stars-row"><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i></div>
+                            </div>
+                            <h3 class="project-type-big">
+                                RED GPON
+                                <span class="block text-lg mt-2 font-bold tracking-widest opacity-70">CON REDUNDANCIA</span>
+                            </h3>
+                            <div class="location-tag"><i class="ph-fill ph-map-pin mr-1"></i> TRUJILLO, PERÚ</div>
+                            <div class="id-badge">ID: PRJ-2204</div>
+                        </div>
+                        <div class="card-layer-back">
+                            <div class="back-content">
+                                <span class="why-label">DESAFÍO Y SOLUCIÓN</span>
+                                <div class="why-text-container">
+                                    <p class="why-text">
+                                        El cliente solicitó un requerimiento inusual: una red GPON con redundancia física al 100% hasta el nivel de NAPs secundarios. Esta particularidad exigió redefinir nuestros estándares de diseño para adaptar la topología a la visión de seguridad del cliente, entregando una solución personalizada y óptima para su tranquilidad operativa.
+                                    </p>
+                                </div>
+                                <div class="client-meta-row">
+                                    <div class="client-item"><h4>Cliente</h4><p>RAMSLEX S.A.C.</p></div>
+                                    <div class="client-item text-right"><h4>Entrega</h4><p>Abr 2022</p></div>
+                                </div>
+                            </div>
+                            <div class="back-bottom-section">
+                                <div class="data-grid-compact">
+                                    <div class="data-point"><span class="data-val">100<small>%</small></span><span class="data-lbl">Redundancia</span></div>
+                                    <div class="data-point text-right"><span class="data-val">200</span><span class="data-lbl">Usuarios</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- GRID 2: SEGUNDO BLOQUE (Restaurado y oculto) -->
+                <div id="more-projects-grid" class="hidden opacity-0 transform translate-y-10 transition-all duration-700 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                    
+                    <!-- === PROYECTO 04 (AREQUIPA - HÍBRIDA) === -->
+                    <div class="slide-card-container group">
+                        <div class="card-layer-front">
+                            <div class="complexity-badge">
+                                <span class="comp-label">COMPLEJIDAD</span>
+                                <div class="stars-row"><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-off"></i></div>
+                            </div>
+                            <h3 class="project-type-big">RED<br>GPON</h3>
+                            <div class="location-tag"><i class="ph-fill ph-map-pin mr-1"></i> AREQUIPA, PERÚ</div>
+                            <div class="id-badge">ID: PRJ-2107</div>
+                        </div>
+                        <div class="card-layer-back">
+                            <div class="back-content">
+                                <span class="why-label">DESAFÍO Y SOLUCIÓN</span>
+                                <div class="why-text-container">
+                                    <p class="why-text">
+                                        Para adaptarse a la geografía accidentada y optimizar el CAPEX, se decidió implementar una arquitectura híbrida (Balanceada/Desbalanceada). El reto principal fue la integración transparente sobre la infraestructura 'legacy' existente del cliente, exigiendo un análisis exhaustivo de compatibilidad para reutilizar la red sin sacrificar rendimiento.
+                                    </p>
+                                </div>
+                                <div class="client-meta-row">
+                                    <div class="client-item"><h4>Cliente</h4><p>FIBER FLEX E.I.R.L.</p></div>
+                                    <div class="client-item text-right"><h4>Entrega</h4><p>Jul 2021</p></div>
+                                </div>
+                            </div>
+                            <div class="back-bottom-section">
+                                <div class="data-grid-compact">
+                                    <div class="data-point"><span class="data-val">Híbrida</span><span class="data-lbl">Topología</span></div>
+                                    <div class="data-point text-right"><span class="data-val">Legacy</span><span class="data-lbl">Integración</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- === PROYECTO 05 (CARACTERIZACIÓN PREDIAL) === -->
+                    <div class="slide-card-container group">
+                        <div class="card-layer-front">
+                            <div class="complexity-badge">
+                                <span class="comp-label">COMPLEJIDAD</span>
+                                <div class="stars-row"><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i></div>
+                            </div>
+                            <h3 class="project-type-medium">CARACTERIZACIÓN<br>PREDIAL</h3>
+                            <div class="location-tag"><i class="ph-fill ph-map-pin mr-1"></i> AREQUIPA, PERÚ</div>
+                            <div class="id-badge">ID: PRJ-2310</div>
+                        </div>
+                        <div class="card-layer-back">
+                            <div class="back-content">
+                                <span class="why-label">DESAFÍO Y SOLUCIÓN</span>
+                                <div class="why-text-container">
+                                    <p class="why-text">
+                                        Se realizó la caracterización predial para conocer las unidades familiares como información base para la proyección de la red de WOW en Arequipa. El trabajo se realizó en 10 distritos, implicando un manejo masivo de personal en campo, rigurosa auditoría de datos y digitalización acelerada de información para cumplir con los cronogramas de expansión.
+                                    </p>
+                                </div>
+                                <div class="client-meta-row">
+                                    <div class="client-item"><h4>Cliente</h4><p>GYGA CONSULTING S.A.C.</p></div>
+                                    <div class="client-item text-right"><h4>Entrega</h4><p>Oct 2023</p></div>
+                                </div>
+                            </div>
+                            <div class="back-bottom-section">
+                                <div class="data-grid-compact">
+                                    <div class="data-point"><span class="data-val">10</span><span class="data-lbl">Distritos</span></div>
+                                    <div class="data-point text-right"><span class="data-val">Masivo</span><span class="data-lbl">Personal</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- === PROYECTO 06 (RED DE CÁMARAS) === -->
+                    <div class="slide-card-container group">
+                        <div class="card-layer-front">
+                            <div class="complexity-badge">
+                                <span class="comp-label">COMPLEJIDAD</span>
+                                <div class="stars-row"><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-on"></i><i class="ph-fill ph-star star-off"></i></div>
+                            </div>
+                            <h3 class="project-type-big">RED DE<br>CÁMARAS</h3>
+                            <div class="location-tag"><i class="ph-fill ph-map-pin mr-1"></i> MAJES, PERÚ</div>
+                            <div class="id-badge">ID: PRJ-2510</div>
+                        </div>
+                        <div class="card-layer-back">
+                            <div class="back-content">
+                                <span class="why-label">DESAFÍO Y SOLUCIÓN</span>
+                                <div class="why-text-container">
+                                    <p class="why-text">
+                                        Reproyección de un diseño de red de seguridad ciudadana. Se realizó el relevamiento y confirmación de ubicación de postería proyectada vs existente, ejecutando toda la ingeniería de detalle (planos CAD, topología de red y distribución de cámaras) para asegurar cobertura óptima y viabilidad técnica antes del despliegue.
+                                    </p>
+                                </div>
+                                <div class="client-meta-row">
+                                    <div class="client-item"><h4>Cliente</h4><p>MEG PERU S.A.C.</p></div>
+                                    <div class="client-item text-right"><h4>Entrega</h4><p>Oct 2025</p></div>
+                                </div>
+                            </div>
+                            <div class="back-bottom-section">
+                                <div class="data-grid-compact">
+                                    <div class="data-point"><span class="data-val">Ingeniería</span><span class="data-lbl">Servicio</span></div>
+                                    <div class="data-point text-right"><span class="data-val">CCTV</span><span class="data-lbl">Red</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Botones de Control -->
+                <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                    <button onclick="togglePortfolio()" class="group flex items-center gap-3 text-gray-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest px-6 py-3 border border-transparent hover:border-white/10 rounded-full">
+                        <span class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#FCBF26] group-hover:text-black transition-colors"><i class="ph-bold ph-caret-up"></i></span> Cerrar Sección
+                    </button>
+                    <button id="load-more-btn" onclick="loadMoreProjects()" class="group flex items-center gap-3 text-[#FCBF26] hover:text-white transition-colors text-xs font-bold uppercase tracking-widest px-6 py-3 border border-[#FCBF26]/30 hover:border-[#FCBF26] rounded-full hover:bg-[#FCBF26]/10">
+                        <i class="ph-bold ph-arrows-clockwise text-lg group-hover:rotate-180 transition-transform duration-500"></i> Cargar Siguiente Bloque
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AQUÍ SE INSERTÓ EL CONTENIDO DE PARTE_FINAL_EVA (Reemplazando la antigua sección de partners y footer) -->
+
+    <!-- SECCIÓN: OPERADORES POTENCIADOS (Compactada) -->
+    <section id="operadores-potenciados" class="partners-section py-12 md:py-16 bg-[#100F1D] border-t border-white/5 relative z-10">
+        <div class="container mx-auto max-w-6xl px-6">
+            <div class="text-center max-w-3xl mx-auto mb-8">
+                <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-2 block">SOPORTE DE INFRAESTRUCTURA</span>
+                <h2 class="text-2xl md:text-3xl font-heading font-bold text-white mb-3 tracking-tight">Operadores Potenciados</h2>
+                <div class="h-[1px] w-full max-w-md mx-auto bg-gradient-to-r from-transparent via-[#FCBF26] to-transparent mb-4 opacity-70"></div>
+                <p class="text-gray-400 text-xs md:text-sm max-w-lg mx-auto leading-relaxed">Somos el motor de ingeniería detrás de grandes despliegues. Brindamos la capacidad técnica que permite a estas empresas expandir su cobertura sin límites.</p>
+            </div>
+            
+            <div class="marquee-container mb-0">
+                <div class="marquee-track">
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/sinergia.png" alt="Sinergia Global" class="logo-img logo-zoom" onerror="this.style.display='none'"><span class="logo-extra-text" style="display: block;">SINERGIA GLOBAL</span></div><div class="card-text-area"><span class="service-tag">EXPEDIENTES</span></div></div>
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/lagos.png" alt="Lagos" class="logo-img logo-lagos-effect" onerror="this.style.display='none'"><span class="logo-extra-text" style="display: block;">TELECOMUNICACIONES<br>LAGOS</span></div><div class="card-text-area"><span class="service-tag">INGENIERÍA</span></div></div>
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/argitec.png" alt="Argitec" class="logo-img logo-zoom" onerror="this.style.display='none'"></div><div class="card-text-area"><span class="service-tag">DISEÑO FTTH</span></div></div>
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/axion.png" alt="Axion" class="logo-img" onerror="this.style.display='none'"></div><div class="card-text-area"><span class="service-tag">DISEÑO FTTH</span></div></div>
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/camaris.png" alt="Camaris" class="logo-img logo-zoom" onerror="this.style.display='none'"></div><div class="card-text-area"><span class="service-tag">TOPOLOGÍA</span></div></div>
+                    <!-- REPETICIÓN -->
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/sinergia.png" alt="Sinergia" class="logo-img logo-zoom"><span class="logo-extra-text" style="display: block;">SINERGIA GLOBAL</span></div><div class="card-text-area"><span class="service-tag">EXPEDIENTES</span></div></div>
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/lagos.png" alt="Lagos" class="logo-img logo-lagos-effect"><span class="logo-extra-text" style="display: block;">TELECOMUNICACIONES<br>LAGOS</span></div><div class="card-text-area"><span class="service-tag">INGENIERÍA</span></div></div>
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/argitec.png" alt="Argitec" class="logo-img logo-zoom"></div><div class="card-text-area"><span class="service-tag">DISEÑO FTTH</span></div></div>
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/axion.png" alt="Axion" class="logo-img"></div><div class="card-text-area"><span class="service-tag">DISEÑO FTTH</span></div></div>
+                    <div class="fixed-partner-card group"><div class="card-logo-area"><img src="img/camaris.png" alt="Camaris" class="logo-img logo-zoom"></div><div class="card-text-area"><span class="service-tag">TOPOLOGÍA</span></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: EXPERIENCIAS ISP (RESTAURADA) -->
+    <section id="experiencias-isp" class="py-16 bg-[#08080c] relative border-t border-white/5 overflow-hidden">
+        <div class="container mx-auto max-w-7xl px-6 relative z-10">
+            <div class="mb-10 text-center mx-auto max-w-4xl flex flex-col items-center">
+                <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-2 block">EXPERIENCIA ISP</span>
+                <div class="inline-block relative mb-4">
+                    <h2 class="text-2xl md:text-3xl font-heading font-bold text-white tracking-tight relative z-10 px-4 pb-3">Voces de Nuestra Red</h2> 
+                    <div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#FCBF26] to-transparent opacity-70"></div>
+                </div>
+                <p class="text-gray-400 text-xs md:text-sm leading-relaxed mx-auto max-w-2xl">Lo que dicen los ISPs, que confiaron en nuestra solución integral de diseño e implementación.</p>
+            </div>
+
+            <div class="relative group/slider">
+                <button onclick="moveTestimonial(-1)" class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-20 w-10 h-10 rounded-full bg-[#161620] border border-white/10 text-white flex items-center justify-center hover:border-[#FCBF26] hover:text-[#FCBF26] transition-all duration-300 shadow-lg opacity-0 group-hover/slider:opacity-100 focus:opacity-100"><i class="ph-bold ph-caret-left text-lg"></i></button>
+                <button onclick="moveTestimonial(1)" class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-20 w-10 h-10 rounded-full bg-[#161620] border border-white/10 text-white flex items-center justify-center hover:border-[#FCBF26] hover:text-[#FCBF26] transition-all duration-300 shadow-lg opacity-0 group-hover/slider:opacity-100 focus:opacity-100"><i class="ph-bold ph-caret-right text-lg"></i></button>
+
+                <div class="overflow-hidden w-full px-2 py-2">
+                    <div id="testimonial-track" class="flex gap-6 transition-transform duration-500 ease-out will-change-transform">
+                        <div class="testimonial-slide">
+                            <div class="isp-quote-card group">
+                                <i class="ph-fill ph-quotes absolute top-4 right-4 text-3xl text-white/5 group-hover:text-[#FCBF26]/10 transition-colors"></i>
+                                <div class="quote-body mb-3 relative z-10"><p>"Con EVA rediseñamos mi red para todo Tarma y nos acompañó en todo el proceso de implementación como soporte ante cualquier modificación."</p></div>
+                                <div class="w-12 h-[1px] bg-white/10 mb-3 group-hover:w-full group-hover:bg-[#FCBF26]/30 transition-all duration-500"></div> 
+                                <div class="client-info flex items-center gap-3 mt-auto">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1A1B29] to-[#0A0912] border border-white/10 flex items-center justify-center text-[#FCBF26] font-bold text-sm shrink-0">TC</div>
+                                    <div><h4 class="text-white font-bold text-sm leading-tight">Tele Cable S.M.</h4><div class="flex items-center gap-2 mt-0.5"><img src="https://flagcdn.com/w20/pe.png" alt="Peru" class="w-4 opacity-80"><span class="text-[10px] text-gray-400 uppercase tracking-wide font-bold">Tarma, Perú</span></div></div>
+                                    <div class="ml-auto"><span class="text-[9px] font-mono text-[#FCBF26] border border-[#FCBF26]/30 px-2 py-1 rounded bg-[#FCBF26]/5">XGPON</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-slide">
+                            <div class="isp-quote-card group">
+                                <i class="ph-fill ph-quotes absolute top-4 right-4 text-3xl text-white/5 group-hover:text-[#FCBF26]/10 transition-colors"></i>
+                                <div class="quote-body mb-3 relative z-10"><p>"Integró eficientemente mi red GPON y red de puntos de acceso inalámbrico hotspot, mantuvimos una comunicación constante y profesional."</p></div>
+                                <div class="w-12 h-[1px] bg-white/10 mb-3 group-hover:w-full group-hover:bg-[#FCBF26]/30 transition-all duration-500"></div>
+                                <div class="client-info flex items-center gap-3 mt-auto">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1A1B29] to-[#0A0912] border border-white/10 flex items-center justify-center text-[#FCBF26] font-bold text-sm shrink-0">IP</div>
+                                    <div><h4 class="text-white font-bold text-sm leading-tight">Inversionista Privado</h4><div class="flex items-center gap-2 mt-0.5"><img src="https://flagcdn.com/w20/co.png" alt="Colombia" class="w-4 opacity-80"><span class="text-[10px] text-gray-400 uppercase tracking-wide font-bold">Casuarito, COL</span></div></div>
+                                    <div class="ml-auto"><span class="text-[9px] font-mono text-[#FCBF26] border border-[#FCBF26]/30 px-2 py-1 rounded bg-[#FCBF26]/5">GPON</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-slide">
+                            <div class="isp-quote-card group">
+                                <i class="ph-fill ph-quotes absolute top-4 right-4 text-3xl text-white/5 group-hover:text-[#FCBF26]/10 transition-colors"></i>
+                                <div class="quote-body mb-3 relative z-10"><p>"Diseño integral según nuestros requerimientos y buen aliado para nuestro proyecto GPON, continuaremos trabajando con EVA en futuras ampliaciones."</p></div>
+                                <div class="w-12 h-[1px] bg-white/10 mb-3 group-hover:w-full group-hover:bg-[#FCBF26]/30 transition-all duration-500"></div>
+                                <div class="client-info flex items-center gap-3 mt-auto">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1A1B29] to-[#0A0912] border border-white/10 flex items-center justify-center text-[#FCBF26] font-bold text-sm shrink-0">NT</div>
+                                    <div><h4 class="text-white font-bold text-sm leading-tight">Nevitel Telecom</h4><div class="flex items-center gap-2 mt-0.5"><img src="https://flagcdn.com/w20/pe.png" alt="Peru" class="w-4 opacity-80"><span class="text-[10px] text-gray-400 uppercase tracking-wide font-bold">Mala, Perú</span></div></div>
+                                    <div class="ml-auto"><span class="text-[9px] font-mono text-[#FCBF26] border border-[#FCBF26]/30 px-2 py-1 rounded bg-[#FCBF26]/5">GPON</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-center gap-2 mt-6"> 
+                    <div class="w-2 h-2 rounded-full bg-[#FCBF26]"></div><div class="w-2 h-2 rounded-full bg-white/20"></div><div class="w-2 h-2 rounded-full bg-white/20"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NUEVA SECCIÓN: ESTADÍSTICAS DE IMPACTO (REDISEÑO MINIMALISTA / HUD STYLE) -->
+    <section id="impact-stats" class="py-12 relative z-10 border-t border-white/5 bg-[#0A0912] overflow-hidden">
+        <!-- Efecto de luz ambiental central -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-6xl h-24 bg-[#FCBF26]/5 blur-[60px] rounded-full pointer-events-none"></div>
+
+        <div class="container mx-auto max-w-7xl px-6 relative z-10">
+            <!-- Contenedor Flex/Grid con líneas divisorias en lugar de cajas -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-y-0 divide-y divide-white/5 md:divide-y-0 md:divide-x md:divide-white/10">
+                
+                <!-- Stat 1: KM Coberturado -->
+                <div class="flex flex-col items-center justify-center px-4 relative group">
+                    <div class="text-4xl md:text-5xl lg:text-6xl font-heading font-black text-white mb-1 flex items-baseline tracking-tighter transition-transform duration-500 group-hover:scale-110 group-hover:text-[#FCBF26]">
+                        <span class="text-[#FCBF26] text-xl lg:text-2xl align-top mr-1 opacity-60 group-hover:opacity-100 transition-opacity">+</span>
+                        <span class="counter" data-target="1000">0</span>
+                        <span class="text-sm text-gray-600 ml-1 font-mono font-normal self-end mb-2 group-hover:text-white transition-colors">km²</span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold group-hover:text-white transition-colors duration-300">Cobertura</p>
+                </div>
+
+                <!-- Stat 2: Hogares Conectados -->
+                <div class="flex flex-col items-center justify-center px-4 relative group">
+                    <div class="text-4xl md:text-5xl lg:text-6xl font-heading font-black text-white mb-1 flex items-baseline tracking-tighter transition-transform duration-500 group-hover:scale-110 group-hover:text-[#FCBF26]">
+                        <span class="text-[#FCBF26] text-xl lg:text-2xl align-top mr-1 opacity-60 group-hover:opacity-100 transition-opacity">+</span>
+                        <span class="counter" data-target="1">0</span>
+                        <span class="text-3xl md:text-4xl text-[#FCBF26] font-bold ml-1">M</span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold group-hover:text-white transition-colors duration-300">Hogares Conectados</p>
+                </div>
+
+                <!-- Stat 3: Proyectos Entregados -->
+                <div class="flex flex-col items-center justify-center px-4 relative group">
+                    <div class="text-4xl md:text-5xl lg:text-6xl font-heading font-black text-white mb-1 flex items-baseline tracking-tighter transition-transform duration-500 group-hover:scale-110 group-hover:text-[#FCBF26]">
+                        <span class="text-[#FCBF26] text-xl lg:text-2xl align-top mr-1 opacity-60 group-hover:opacity-100 transition-opacity">+</span>
+                        <span class="counter" data-target="200">0</span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold group-hover:text-white transition-colors duration-300">Proyectos Entregados</p>
+                </div>
+
+                <!-- Stat 4: Postes Gestionados -->
+                <div class="flex flex-col items-center justify-center px-4 relative group">
+                    <div class="text-4xl md:text-5xl lg:text-6xl font-heading font-black text-white mb-1 flex items-baseline tracking-tighter transition-transform duration-500 group-hover:scale-110 group-hover:text-[#FCBF26]">
+                        <span class="text-[#FCBF26] text-xl lg:text-2xl align-top mr-1 opacity-60 group-hover:opacity-100 transition-opacity">+</span>
+                        <span class="counter" data-target="50">0</span>
+                        <span class="text-2xl md:text-3xl text-gray-600 font-heading font-bold ml-1 group-hover:text-white transition-colors">k</span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold group-hover:text-white transition-colors duration-300">Postes Gestionados</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- NUEVA SECCIÓN: CONTACTO -->
+    <section id="contacto" class="py-24 bg-[#050508] relative z-10 border-t border-white/5 overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full bg-[#FCBF26]/5 blur-[100px] rounded-full pointer-events-none"></div>
+        <div class="container mx-auto max-w-5xl px-6 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Columna Izquierda (SIN ATENCIÓN DIRECTA NI CORREO) -->
+                <div>
+                    <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-4 block flex items-center gap-2"><span class="w-8 h-[2px] bg-[#FCBF26]"></span> Hablemos</span>
+                    <h2 class="text-4xl md:text-5xl font-heading font-bold text-white mb-6 leading-tight">¿Listo para escalar <br> tu infraestructura?</h2>
+                    <p class="text-gray-400 text-lg mb-8 leading-relaxed">Ya sea que necesites un diseño GPON llave en mano o soporte de ingeniería B2B, nuestro equipo está listo para integrarse al tuyo.</p>
+                    <div class="flex flex-col gap-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-lg bg-[#FCBF26]/10 flex items-center justify-center text-[#FCBF26] text-2xl shrink-0 border border-[#FCBF26]/20"><i class="ph-fill ph-map-pin"></i></div>
+                            <div>
+                                <h4 class="text-white font-bold text-sm uppercase tracking-wide">Base Operativa</h4>
+                                <p class="text-gray-400 text-base mt-1">Arequipa, Perú <span class="text-xs text-gray-600 ml-2">(Cobertura LATAM)</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Columna Derecha con Iconos Agregados -->
+                <div class="flex flex-col items-center gap-8">
+                    <!-- Tarjeta -->
+                    <div class="relative w-full">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-[#FCBF26] to-[#d69e18] rounded-2xl blur opacity-20"></div>
+                        <div class="relative bg-[#161521] border border-white/10 rounded-2xl p-8 text-center shadow-2xl">
+                            <h3 class="text-2xl font-bold text-white mb-2">Consulta Rápida</h3>
+                            <p class="text-gray-400 text-sm mb-8">Cuéntanos brevemente tu requerimiento y un ingeniero especialista te responderá hoy mismo.</p>
+                            <a href="https://wa.me/51978649801?text=Hola,%20me%20gustaría%20cotizar%20un%20servicio%20de%20ingeniería." target="_blank" class="block w-full py-4 bg-[#FCBF26] text-[#100F1D] font-extrabold uppercase tracking-widest rounded-lg hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(252,191,38,0.3)] hover:shadow-[0_0_30px_rgba(252,191,38,0.5)] mb-4">Iniciar Chat <i class="ph-bold ph-whatsapp-logo ml-2 text-xl align-middle"></i></a>
+                            <p class="text-xs text-gray-600">* Tiempo de respuesta promedio: <span class="text-[#FCBF26]">30 min</span></p>
+                        </div>
+                    </div>
+                    <!-- Redes Sociales (Movidas del footer) EN NUEVA PESTAÑA -->
+                    <div class="flex gap-4">
+                        <a href="#" target="_blank" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-[#FCBF26] hover:text-[#100F1D] transition-all duration-300 transform hover:scale-110">
+                            <i class="ph-fill ph-linkedin-logo text-xl"></i>
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=61571574387983" target="_blank" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-[#FCBF26] hover:text-[#100F1D] transition-all duration-300 transform hover:scale-110">
+                            <i class="ph-fill ph-facebook-logo text-xl"></i>
+                        </a>
+                        <a href="https://www.instagram.com/grupo.eva.digital/" target="_blank" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-[#FCBF26] hover:text-[#100F1D] transition-all duration-300 transform hover:scale-110">
+                            <i class="ph-fill ph-instagram-logo text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Copyright simple (sin footer completo) -->
+            <div class="mt-20 border-t border-white/5 pt-8 text-center">
+                <p class="text-xs text-gray-600">© 2025 EVA Soluciones Integrales. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts de Animación y Lógica Principal (Combinados) -->
+    <script>
+        // --- 1. LÓGICA DEL MENÚ INTELIGENTE (SCROLL) ---
+        let lastScrollTop = 0;
+        const header = document.getElementById('main-header');
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scroll hacia abajo -> Esconder
+                header.style.transform = 'translateY(-100%)';
+            } else {
+                // Scroll hacia arriba -> Mostrar
+                header.style.transform = 'translateY(0)';
+            }
+            lastScrollTop = scrollTop;
+        });
+        
+        // Mobile Menu toggle
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileBtn = document.getElementById('mobile-btn');
+        const closeMenu = document.getElementById('close-menu');
+        function toggleMenu() {
+            mobileMenu.classList.toggle('menu-closed');
+            mobileMenu.classList.toggle('menu-open');
+        }
+        mobileBtn.addEventListener('click', toggleMenu);
+        closeMenu.addEventListener('click', toggleMenu);
+
+        // --- 1.1 FUNCIONALIDAD DE HIGHLIGHT (RESTAURADA) ---
+        function highlightSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Resetear animación si ya se ejecutó
+                el.classList.remove('highlight-flash');
+                void el.offsetWidth; // trigger reflow
+                el.classList.add('highlight-flash');
+            }
+        }
+
+        // --- 2. LÓGICA DEL NUEVO HERO (Principal EVA) ---
+        const heroCanvas = document.getElementById('hero-canvas');
+        let hCtx, hW, hH;
+        let nodes = [], anchors = [], pulses = [];
+        let mouse = { x: undefined, y: undefined, isMoving: false }; 
+        let mouseTimeout; 
+
+        // CONFIGURACIÓN MAESTRA
+        const CONFIG = {
+            NODE_DENSITY_DIVISOR: 4000, 
+            CONNECTION_DIST: 130,        
+            MOUSE_RADIUS: 200,           
+            PULSE_FREQ: 120, // 2s
+            COLOR: '252, 191, 38'        
+        };
+
+        function resizeHero() { 
+            if (!heroCanvas) return;
+            hW = heroCanvas.width = window.innerWidth; 
+            hH = heroCanvas.height = window.innerHeight; 
+        }
+        
+        window.addEventListener('mousemove', function(event) {
+            if (!heroCanvas) return;
+            const rect = heroCanvas.getBoundingClientRect();
+            mouse.x = event.clientX - rect.left;
+            mouse.y = event.clientY - rect.top;
+            mouse.isMoving = true;
+            clearTimeout(mouseTimeout);
+            mouseTimeout = setTimeout(() => { mouse.isMoving = false; }, 100);
+        });
+        window.addEventListener('mouseout', function() { mouse.x = undefined; mouse.y = undefined; mouse.isMoving = false; });
+
+        // PROTECCIÓN: Solo agregar listener si el elemento 'inicio' existe
+        const inicioSection = document.getElementById('inicio');
+        if (inicioSection) {
+            inicioSection.addEventListener('click', function(e) {
+                if (nodes.length > 600 || !heroCanvas) return; 
+                const rect = heroCanvas.getBoundingClientRect();
+                let n = new Node(e.clientX - rect.left, e.clientY - rect.top);
+                nodes.push(n);
+            });
+        }
+
+        class Node {
+            constructor(x, y) { 
+                this.x = x; this.y = y; 
+                this.baseX = x; this.baseY = y;
+                this.size = Math.random() * 1 + 1; // Radio 1-2px
+                this.baseSpeed = 0.3; 
+                let angle = Math.random() * Math.PI * 2;
+                this.vx = Math.cos(angle) * this.baseSpeed;
+                this.vy = Math.sin(angle) * this.baseSpeed;
+                this.connections = 0; 
+            }
+            update() { 
+                this.baseX += this.vx; this.baseY += this.vy;
+                if (this.baseX <= 0 || this.baseX >= hW) { this.vx *= -1; this.baseX = Math.max(0, Math.min(this.baseX, hW)); }
+                if (this.baseY <= 0 || this.baseY >= hH) { this.vy *= -1; this.baseY = Math.max(0, Math.min(this.baseY, hH)); }
+
+                let targetX = this.baseX; let targetY = this.baseY;
+                if (mouse.x !== undefined && mouse.isMoving) {
+                    let dx = mouse.x - this.baseX; let dy = mouse.y - this.baseY;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < CONFIG.MOUSE_RADIUS) {
+                        let force = (CONFIG.MOUSE_RADIUS - dist) / CONFIG.MOUSE_RADIUS; 
+                        let stretch = 0.6 * force;
+                        targetX += dx * stretch; targetY += dy * stretch;
+                    }
+                }
+                this.x += (targetX - this.x) * 0.08;
+                this.y += (targetY - this.y) * 0.08;
+            } 
+            draw() { 
+                if (!hCtx) return;
+                let alpha = Math.min(1.0, 0.2 + (this.connections * 0.2));
+                hCtx.fillStyle = `rgba(${CONFIG.COLOR}, ${alpha})`; 
+                hCtx.beginPath(); hCtx.arc(this.x, this.y, this.size, 0, Math.PI*2); hCtx.fill(); 
+            }
+        } 
+
+        class Pulse {
+            constructor() { this.reset(); }
+            reset() {
+                this.activeSegments = []; this.fadingSegments = []; this.visited = new Set();
+                let startNode = {x: 0, y: 0};
+                if (anchors.length > 0) startNode = anchors[Math.floor(Math.random() * anchors.length)];
+                this.startNode = startNode; 
+                this.targetNode = null;
+                let bestDist = 0;
+                for (let a of anchors) {
+                    let d = Math.hypot(a.x - startNode.x, a.y - startNode.y);
+                    if (d > bestDist) { bestDist = d; this.targetNode = a; }
+                }
+                if (!this.targetNode) this.targetNode = anchors[0];
+                this.totalDistance = bestDist; 
+                this.triggerFlow(startNode);
+                this.deadCounter = 0;
+            }
+            triggerFlow(sourceNode) {
+                this.visited.add(sourceNode);
+                let potential = [];
+                let candidates = [...nodes, ...anchors];
+                for (let n of candidates) {
+                    if (this.visited.has(n)) continue;
+                    let d = Math.hypot(n.x - sourceNode.x, n.y - sourceNode.y);
+                    if (d < CONFIG.CONNECTION_DIST) {
+                        let dTarget = Math.hypot(n.x - this.targetNode.x, n.y - this.targetNode.y);
+                        potential.push({ node: n, score: dTarget });
+                    }
+                }
+                if (potential.length === 0) return;
+                potential.sort((a, b) => a.score - b.score);
+                let distStart = Math.hypot(sourceNode.x - this.startNode.x, sourceNode.y - this.startNode.y);
+                let progress = Math.min(1, distStart / this.totalDistance); 
+                let branchProb = (progress < 0.6) ? Math.sin(progress * Math.PI) * 0.4 : 0;
+                let selected = [potential[0]];
+                if (potential.length > 1 && Math.random() < branchProb) selected.push(potential[1]);
+                for (let item of selected) {
+                    this.visited.add(item.node);
+                    this.activeSegments.push({
+                        start: sourceNode, end: item.node, progress: 0,
+                        speed: 0.3 + Math.random() * 0.3 
+                    });
+                }
+            }
+            update() {
+                if (this.activeSegments.length === 0 && this.fadingSegments.length === 0) {
+                    this.deadCounter++;
+                    if (this.deadCounter > CONFIG.PULSE_FREQ) this.reset(); 
+                    return;
+                }
+                for (let i = this.activeSegments.length - 1; i >= 0; i--) {
+                    let seg = this.activeSegments[i];
+                    seg.progress += seg.speed; 
+                    if (seg.progress >= 1) {
+                        seg.progress = 1;
+                        this.fadingSegments.push({ start: seg.start, end: seg.end, alpha: 1.0 });
+                        if (this.visited.size < 600) this.triggerFlow(seg.end);
+                        this.activeSegments.splice(i, 1);
+                    }
+                }
+                for (let i = this.fadingSegments.length - 1; i >= 0; i--) {
+                    let seg = this.fadingSegments[i];
+                    seg.alpha -= 0.04; 
+                    if (seg.alpha <= 0) this.fadingSegments.splice(i, 1);
+                }
+            }
+            draw() {
+                if (!hCtx) return;
+                for (let seg of this.fadingSegments) {
+                    let d = Math.hypot(seg.end.x - seg.start.x, seg.end.y - seg.start.y);
+                    let f = Math.max(0, 1 - (d / CONFIG.CONNECTION_DIST)); 
+                    let baseThick = 0.2 + (f * 0.2); 
+                    let baseAlpha = 0.2 + (f * 0.5); 
+                    let pThick = baseThick + 0.1;
+                    let pAlpha = Math.min(1.0, baseAlpha + 0.4);
+                    hCtx.beginPath(); hCtx.strokeStyle = `rgba(${CONFIG.COLOR}, ${pAlpha * seg.alpha})`;
+                    hCtx.lineWidth = pThick; hCtx.moveTo(seg.start.x, seg.start.y); hCtx.lineTo(seg.end.x, seg.end.y); hCtx.stroke();
+                }
+                hCtx.shadowBlur = 0;
+                for (let seg of this.activeSegments) {
+                    let d = Math.hypot(seg.end.x - seg.start.x, seg.end.y - seg.start.y);
+                    let f = Math.max(0, 1 - (d / CONFIG.CONNECTION_DIST));
+                    let baseThick = 0.2 + (f * 0.2);
+                    let baseAlpha = 0.2 + (f * 0.5);
+                    let pThick = baseThick + 0.1;
+                    let pAlpha = Math.min(1.0, baseAlpha + 0.4);
+                    hCtx.strokeStyle = `rgba(${CONFIG.COLOR}, ${pAlpha})`; hCtx.lineWidth = pThick;
+                    hCtx.beginPath(); 
+                    let cx = seg.start.x + (seg.end.x - seg.start.x)*seg.progress;
+                    let cy = seg.start.y + (seg.end.y - seg.start.y)*seg.progress;
+                    hCtx.moveTo(seg.start.x, seg.start.y); hCtx.lineTo(cx, cy); hCtx.stroke();
+                }
+            }
+        }
+
+        // --- INICIALIZACIÓN NUEVO HERO ---
+        function initAnchors() {
+            anchors = []; const sp = 100; const off = 80;
+            for(let x=-off; x<hW+off; x+=sp) { anchors.push({x:x, y:-off}); anchors.push({x:x, y:hH+off}); }
+            for(let y=-off; y<hH+off; y+=sp) { anchors.push({x:-off, y:y}); anchors.push({x:hW+off, y:y}); }
+        }
+
+        function initHero() { 
+            if (!heroCanvas) return;
+            hCtx = heroCanvas.getContext('2d');
+            if (!hCtx) return;
+
+            nodes = []; pulses = [];
+            let count = Math.floor(hW * hH / CONFIG.NODE_DENSITY_DIVISOR); 
+            for(let i=0; i<count; i++) nodes.push(new Node(Math.random()*hW, Math.random()*hH)); 
+            initAnchors();
+            pulses.push(new Pulse()); 
+            animateHero(); 
+        }
+        
+        function animateHero() {
+            if (!hCtx) return;
+            hCtx.clearRect(0,0,hW,hH); 
+            nodes.forEach(n => { n.update(); n.connections = 0; });
+
+            for(let i=0; i<nodes.length; i++) {
+                let n1 = nodes[i]; 
+                for(let j=i+1; j<nodes.length; j++) {
+                    let n2 = nodes[j]; let d = Math.hypot(n1.x-n2.x, n1.y-n2.y);
+                    if(d < CONFIG.CONNECTION_DIST) { 
+                        drawBaseLine(n1, n2, d); n1.connections++; n2.connections++; 
+                    }
+                }
+                for(let k=0; k<anchors.length; k++) {
+                    let a = anchors[k]; let d = Math.hypot(n1.x-a.x, n1.y-a.y);
+                    if(d < CONFIG.CONNECTION_DIST) { 
+                        drawBaseLine(n1, a, d); n1.connections++; 
+                    }
+                }
+            }
+            nodes.forEach(n => n.draw());
+            for(let p of pulses) { p.update(); p.draw(); }
+            requestAnimationFrame(animateHero);
+        }
+
+        function drawBaseLine(p1, p2, d) {
+            if (!hCtx) return;
+            let f = 1 - (d / CONFIG.CONNECTION_DIST);
+            let th = 0.2 + (f * 0.2); 
+            let al = 0.2 + (f * 0.5); 
+            hCtx.strokeStyle = `rgba(${CONFIG.COLOR}, ${al})`; 
+            hCtx.lineWidth = th; hCtx.beginPath(); hCtx.moveTo(p1.x, p1.y); hCtx.lineTo(p2.x, p2.y); hCtx.stroke(); 
+        }
+
+        // --- 3. LÓGICA DEL FONDO (BACKGROUND SNAKES) ---
+        const bgCanvas = document.getElementById('bg-canvas');
+        let bCtx, bW, bH, beams = [];
+
+        function resizeBg() { 
+            if (!bgCanvas) return;
+            bW = bgCanvas.width = window.innerWidth; 
+            bH = bgCanvas.height = window.innerHeight; 
+        }
+
+        class Snake {
+            constructor() { this.reset(); }
+            reset() { this.x = Math.random()*bW; this.y = Math.random()*bH; this.speed = 6+Math.random()*4; this.angle = Math.floor(Math.random()*4)*(Math.PI/2); this.history = []; this.life = 60+Math.random()*60; }
+            update() { this.life--; if(this.life<=0) { this.reset(); return; } this.history.push({x:this.x, y:this.y}); if(this.history.length>15) this.history.shift(); this.x += Math.cos(this.angle)*this.speed; this.y += Math.sin(this.angle)*this.speed; if(Math.random()<0.05) this.angle += (Math.random()<0.5?1:-1)*(Math.PI/2); }
+            draw() { 
+                if (!bCtx) return;
+                if(this.history.length<2) return; 
+                bCtx.beginPath(); bCtx.moveTo(this.history[0].x, this.history[0].y); 
+                for(let p of this.history) bCtx.lineTo(p.x, p.y); 
+                bCtx.strokeStyle='rgba(252, 191, 38, 0.6)'; bCtx.lineWidth=2; bCtx.stroke(); 
+            }
+        }
+        
+        function initSnakes() { 
+            if (!bgCanvas) return;
+            bCtx = bgCanvas.getContext('2d');
+            if (!bCtx) return;
+
+            beams = []; 
+            for(let i=0; i<6; i++) beams.push(new Snake()); 
+            animateBg(); 
+        }
+        
+        function animateBg() { 
+            if (!bCtx) return; 
+            bCtx.clearRect(0,0,bW,bH); 
+            beams.forEach(b => { b.update(); b.draw(); }); 
+            requestAnimationFrame(animateBg); 
+        }
+
+        /* --- 4. SCRIPTS GENERALES (PORTFOLIO, SLIDERS) --- */
+        let isProjectsOpen = false;
+
+        function togglePortfolio() {
+            const vault = document.getElementById('projects-vault');
+            const icon = document.getElementById('trigger-icon');
+            const trigger = document.getElementById('projects-trigger');
+            
+            if (!vault || !icon || !trigger) return;
+
+            isProjectsOpen = !isProjectsOpen;
+
+            if (isProjectsOpen) {
+                vault.classList.remove('hidden');
+                icon.classList.remove('ph-caret-down');
+                icon.classList.add('ph-caret-up');
+                
+                setTimeout(() => {
+                    vault.style.opacity = '1';
+                    vault.style.transform = 'translateY(0)';
+                }, 10);
+
+            } else {
+                vault.style.opacity = '0';
+                vault.style.transform = 'translateY(-20px)';
+                icon.classList.remove('ph-caret-up');
+                icon.classList.add('ph-caret-down');
+
+                setTimeout(() => {
+                    vault.classList.add('hidden');
+                    trigger.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 500);
+            }
+        }
+
+        function loadMoreProjects() {
+            const moreGrid = document.getElementById('more-projects-grid');
+            const btn = document.getElementById('load-more-btn');
+            
+            if (moreGrid && moreGrid.classList.contains('hidden')) {
+                moreGrid.classList.remove('hidden');
+                setTimeout(() => {
+                    moreGrid.style.opacity = '1';
+                    moreGrid.style.transform = 'translateY(0)';
+                }, 10);
+                
+                if (btn) {
+                    btn.innerHTML = '<i class="ph-bold ph-check text-lg"></i> Todos Cargados';
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.onclick = null;
+                }
+            }
+        }
+
+        /* --- 5. LOGICA SLIDER TESTIMONIOS (ISP) - Traída de Parte Final --- */
+        let testimonialIdx = 0;
+        function getTestimonialItemsPerSlide() { return window.innerWidth >= 1024 ? 3 : (window.innerWidth >= 768 ? 2 : 1); }
+        
+        function moveTestimonial(dir) {
+            const track = document.getElementById('testimonial-track');
+            if (!track) return;
+            const slides = track.children;
+            const total = slides.length;
+            const visible = getTestimonialItemsPerSlide();
+            const maxIdx = total - visible;
+            
+            testimonialIdx += dir;
+            if (testimonialIdx < 0) testimonialIdx = 0;
+            if (testimonialIdx > maxIdx) testimonialIdx = maxIdx;
+            
+            const slideWidth = slides[0].offsetWidth, gap = 24, moveAmount = (slideWidth + gap) * testimonialIdx;
+            track.style.transform = `translateX(-${moveAmount}px)`;
+        }
+
+        /* --- 6. LOGICA CONTADORES ESTADISTICAS - Traída de Parte Final --- */
+        function initCounters() {
+            const statsSection = document.getElementById('impact-stats');
+            const counters = document.querySelectorAll('.counter');
+            let started = false;
+
+            if (!statsSection) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && !started) {
+                    counters.forEach(counter => {
+                        const target = +counter.getAttribute('data-target');
+                        const duration = 2000; // ms
+                        const increment = target / (duration / 16); // aprox 60fps
+                        
+                        let current = 0;
+                        const updateCounter = () => {
+                            current += increment;
+                            if (current < target) {
+                                counter.innerText = Math.ceil(current);
+                                requestAnimationFrame(updateCounter);
+                            } else {
+                                counter.innerText = target;
+                            }
+                        };
+                        updateCounter();
+                    });
+                    started = true;
+                }
+            }, { threshold: 0.2 });
+            observer.observe(statsSection);
+        }
+
+        // --- 7. INICIALIZACIÓN MAESTRA (COMBINADA) ---
+        window.onload = () => {
+            // Inicializar Nuevo Hero
+            resizeHero(); initHero(); 
+            // Inicializar Fondo Original
+            resizeBg(); initSnakes(); 
+            // Inicializar Contadores
+            initCounters();
+        };
+        window.onresize = () => { 
+            resizeHero(); initHero(); 
+            resizeBg(); 
+            // Reset sliders
+            testimonialIdx = 0; moveTestimonial(0); 
+        };
+    </script>
 </body>
 </html>
