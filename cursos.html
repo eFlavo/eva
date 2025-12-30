@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temario Diseño de Redes FTTH-GPON - EVA</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Manrope:wght@300;400;600&family=Open+Sans:wght@300;400;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Iconos Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        /* --- BRANDING EVA DARK THEME --- */
+        :root {
+            --bg-main: #100F1D;
+            --bg-deep: #0A0912;
+            --bg-card: #1A1B29;
+            --accent: #FCBF26;
+            --text-main: #F3F4F6;
+            --text-muted: #D1D5DB;
+        }
+        
+        body { 
+            font-family: 'Open Sans', sans-serif; 
+            background-color: var(--bg-main); 
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(252, 191, 38, 0.03) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.02) 0%, transparent 25%);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, .font-heading { font-family: 'Montserrat', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Estilos de Tarjetas */
+        .course-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .course-card:hover {
+            border-color: rgba(252, 191, 38, 0.4);
+            background: #202130;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            transform: translateY(-3px);
+        }
+
+        /* ICONO DECORATIVO GRANDE */
+        .section-icon-bg {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 9rem; 
+            color: rgba(252, 191, 38, 0.08); 
+            transform: rotate(10deg);
+            pointer-events: none;
+            transition: all 0.5s ease;
+            filter: drop-shadow(0 0 10px rgba(252,191,38,0.1));
+            z-index: 0;
+        }
+        
+        @keyframes floatIcon {
+            0% { transform: translateY(0) rotate(10deg); }
+            50% { transform: translateY(-5px) rotate(12deg); }
+            100% { transform: translateY(0) rotate(10deg); }
+        }
+        
+        .section-icon-bg {
+            animation: floatIcon 6s ease-in-out infinite;
+        }
+
+        .course-card:hover .section-icon-bg {
+            color: rgba(252, 191, 38, 0.15);
+            transform: scale(1.1) rotate(5deg);
+            filter: drop-shadow(0 0 15px rgba(252,191,38,0.3));
+        }
+
+        /* Títulos de Módulos */
+        .module-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 1rem;
+            position: relative;
+            z-index: 10;
+        }
+        .module-number {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: transparent;
+            -webkit-text-stroke: 1px var(--accent);
+            line-height: 0.8;
+            opacity: 0.8;
+        }
+        .module-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            line-height: 1.1;
+            padding-top: 5px;
+        }
+
+        /* Listas Simples */
+        .tech-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            z-index: 10;
+        }
+        .tech-list li {
+            position: relative;
+            padding-left: 1.2rem;
+            margin-bottom: 0.6rem;
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+        .tech-list li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent);
+            border-radius: 1px;
+            opacity: 0.9;
+        }
+        
+        .tech-list ul ul {
+            margin-top: 0.4rem;
+            margin-left: 0.5rem;
+            padding-left: 1rem;
+            border-left: 1px solid rgba(255,255,255,0.15);
+        }
+        .tech-list ul ul li {
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+        }
+        .tech-list ul ul li::before {
+            background-color: rgba(255,255,255,0.5);
+            width: 4px;
+            height: 4px;
+            top: 9px;
+        }
+
+        /* Highlight sutil */
+        .hl {
+            color: var(--accent);
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            background: rgba(252, 191, 38, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Botón de Volver */
+        .back-btn {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 50;
+            background: rgba(16, 15, 29, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+        .back-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateX(-5px); }
+
+    </style>
+</head>
+<body class="pt-24 pb-20">
+
+    <!-- Botón Flotante para volver -->
+    <a href="principal.html" class="back-btn" title="Volver al inicio">
+        <i class="ph-bold ph-arrow-left"></i>
+    </a>
+
+    <!-- HEADER / HERO DEL CURSO -->
+    <header class="container mx-auto px-6 mb-16 relative">
+        <div class="flex flex-col lg:flex-row justify-between items-start border-b border-white/10 pb-8 gap-8">
+            
+            <!-- IZQUIERDA: TÍTULO + FECHA -->
+            <div class="max-w-3xl">
+                <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-sm mb-4 block">Temario Especializado</span>
+                <h1 class="text-4xl md:text-6xl font-black text-white leading-tight uppercase mb-4">
+                    Diseño de Redes <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FCBF26] to-[#F59E0B]">FTTH-GPON</span>
+                </h1>
+                
+                <!-- NUEVO: FECHA DE INICIO DESTACADA -->
+                <div class="inline-flex items-center gap-2 bg-[#FCBF26]/10 border border-[#FCBF26]/30 px-4 py-2 rounded-full">
+                    <i class="ph-fill ph-calendar-check text-[#FCBF26]"></i>
+                    <span class="text-white font-bold tracking-wide uppercase text-sm">Inicio: 19 de Enero</span>
+                </div>
+            </div>
+
+            <!-- DERECHA: LOGO Y CERTIFICACIÓN -->
+            <div class="flex flex-col items-end gap-4 lg:pt-4">
+                <!-- Logo -->
+                <img src="C:\eva\img\LOGO_eva.png" alt="Logo EVA" class="h-24 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <span class="hidden text-white font-bold text-3xl font-heading">EVA</span>
+                
+                <!-- Badge Certificación -->
+                <div class="inline-flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-5 py-3 mt-2">
+                    <i class="ph-fill ph-certificate text-[#FCBF26] text-2xl"></i>
+                    <p class="text-gray-200 text-sm font-medium tracking-wide text-right">
+                        Certificado a nombre de la nación<br>
+                        <strong class="text-white text-base">MINEDU (Perú)</strong>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container mx-auto px-6 max-w-6xl">
+
+        <!-- INTRODUCCIÓN PERSUASIVA -->
+        <div class="bg-gradient-to-r from-[#1A1B29] to-[#151621] border-l-4 border-[#FCBF26] p-8 rounded-r-xl mb-16 shadow-2xl relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                <i class="ph-fill ph-student text-9xl text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-4 uppercase tracking-wide">Especialización Técnica para Profesionales</h3>
+            <p class="text-gray-300 leading-relaxed text-lg relative z-10">
+                Este programa está dirigido a <strong class="text-white">Estudiantes, ISPs, Ingenieros de Telecomunicaciones, Técnicos de campo</strong> y profesionales afines que deseen dominar el diseño de redes FTTH. Se requiere contar con conocimientos básicos de telecomunicaciones. Aprenderás paso a paso, desde los fundamentos físicos hasta la entrega de planos profesionales. Ya sea que busques <strong class="text-[#FCBF26]">optimizar tu propio ISP</strong> o trabajar en el área de diseño de grandes operadoras, aquí adquirirás las habilidades prácticas que el mercado exige hoy.
+            </p>
+        </div>
+
+        <!-- SOFTWARE STRIP -->
+        <div class="mb-20">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="h-[1px] bg-white/10 flex-grow"></div>
+                <span class="text-xs font-mono text-gray-400 uppercase tracking-widest">Herramientas Profesionales</span>
+                <div class="h-[1px] bg-white/10 flex-grow"></div>
+            </div>
+
+            <div class="text-center mb-10">
+                <p class="text-gray-200 text-lg font-medium">
+                    Aprenderemos a usar estas 3 herramientas en <span class="text-[#FCBF26] font-bold">sinergia</span> para crear un diseño profesional.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Google Earth -->
+                <div class="course-card flex items-center gap-6 group hover:-translate-y-2 !py-6 !px-6">
+                    <div class="w-14 h-14 rounded-xl bg-[#FCBF26]/10 flex items-center justify-center text-[#FCBF26] text-3xl group-hover:bg-[#FCBF26] group-hover:text-black transition-all shadow-[0_0_15px_rgba(252,191,38,0.1)]">
+                        <i class="ph-fill ph-globe-hemisphere-west"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white uppercase text-sm mb-1">Google Earth</h4>
+                        <p class="text-xs text-gray-400 font-mono tracking-wide">Diseño Base</p>
+                    </div>
+                </div>
+                <!-- ArcGIS -->
+                <div class="course-card flex items-center gap-6 group hover:-translate-y-2 !py-6 !px-6">
+                    <div class="w-14 h-14 rounded-xl bg-[#FCBF26]/10 flex items-center justify-center text-[#FCBF26] text-3xl group-hover:bg-[#FCBF26] group-hover:text-black transition-all shadow-[0_0_15px_rgba(252,191,38,0.1)]">
+                        <i class="ph-fill ph-map-trifold"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white uppercase text-sm mb-1">ArcGIS</h4>
+                        <p class="text-xs text-gray-400 font-mono tracking-wide">Cálculo Optimizado</p>
+                    </div>
+                </div>
+                <!-- AutoCAD -->
+                <div class="course-card flex items-center gap-6 group hover:-translate-y-2 !py-6 !px-6">
+                    <div class="w-14 h-14 rounded-xl bg-[#FCBF26]/10 flex items-center justify-center text-[#FCBF26] text-3xl group-hover:bg-[#FCBF26] group-hover:text-black transition-all shadow-[0_0_15px_rgba(252,191,38,0.1)]">
+                        <i class="ph-fill ph-pencil-ruler"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white uppercase text-sm mb-1">AutoCAD</h4>
+                        <p class="text-xs text-gray-400 font-mono tracking-wide">Topología Precisa</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULOS DEL CURSO -->
+        <div class="space-y-12">
+            
+            <!-- MÓDULO 01 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-lightbulb section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">01</span>
+                    <h2 class="module-title">Introducción a las redes FTTH</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Entiende la física de la luz y los componentes esenciales sin tecnicismos complejos. Esta es la base sólida que necesitas para evitar errores costosos en la instalación y selección de materiales.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Conceptos Básicos</h4>
+                        <ul>
+                            <li>Ancho de banda</li>
+                            <li>Seguridad</li>
+                            <li>Atenuación</li>
+                            <li>Velocidad de transmisión</li>
+                            <li>Distancias de enlace</li>
+                            <li>Principios ópticos: Refracción y reflexión</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Componentes</h4>
+                        <ul>
+                            <li>Tipos de fibra:
+                                <ul><li>Monomodo</li><li>Multimodo</li></ul>
+                            </li>
+                            <li>Conectores y pulidos:
+                                <ul><li>Diferencias UPC vs APC</li><li>Pérdidas por retorno (ORL)</li></ul>
+                            </li>
+                            <li>Código de colores internacional</li>
+                            <li>Estructura del cable y Sangrado de buffers</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÓDULO 02 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-share-network section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">02</span>
+                    <h2 class="module-title">Arquitecturas de Red</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Aprende a diferenciar y elegir la tecnología correcta para cada cliente. Descubre cuándo vender un enlace dedicado (P2P) a una empresa y cuándo desplegar una red masiva (GPON) para un barrio.
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Redes P2P (Active Ethernet)</h4>
+                        <ul>
+                            <li>Concepto y filosofía</li>
+                            <li>Ancho de banda</li>
+                            <li>Seguridad física</li>
+                            <li>Topologías: Estrella, Anillo, Redundancia</li>
+                            <li>Equipamiento activo (Hardware): Cabecera, Cliente</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Redes GPON</h4>
+                        <ul>
+                            <li>Concepto y filosofía</li>
+                            <li>Multiplexación</li>
+                            <li>Economía de escala</li>
+                            <li>Equipamiento GPON: Cabecera, Planta externa, Cliente</li>
+                            <li>XGPON</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-white/10 text-center relative z-10">
+                    <span class="text-xs font-mono text-gray-400 uppercase tracking-widest">Incluye: Comparativa Técnica/Económica y Redes Híbridas</span>
+                </div>
+            </div>
+
+            <!-- MÓDULO 03 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-tree-structure section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">03</span>
+                    <h2 class="module-title">Topologías de Distribución</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    El corazón del negocio: domina las redes balanceadas y desbalanceadas. Aprenderás a optimizar costos y cobertura según la geografía, decidiendo inteligentemente dónde aplicar cada estructura.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Tipos de Redes</h4>
+                        <ul>
+                            <li>Red Balanceada (Centralizada)</li>
+                            <li>Red Desbalanceada (Cascada): Through (paso), Tap/drop (derivación)</li>
+                            <li>Comparativa técnica: Eficiencia de fibra y Gestión de potencia</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Análisis y Aplicación</h4>
+                        <ul>
+                            <li>Análisis económico: CAPEX (Inversión), OPEX (Mantenimiento)</li>
+                            <li>Criterios de aplicación: Escenario urbano denso vs rural disperso</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÓDULO 04 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-ruler section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">04</span>
+                    <h2 class="module-title">Introducción a Diseño de Redes</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    "Si no se diseña, se fracasa". Conoce la ruta crítica de un proyecto exitoso, los entregables obligatorios y cómo levantar información de campo correctamente antes de empezar a diseñar.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">¿Por qué priorizar tu diseño?</h4>
+                        <ul>
+                            <li>Importancia del diseño profesional</li>
+                            <li>Contenido:
+                                <ul>
+                                    <li>Memoria Descriptiva y Planos</li>
+                                    <li>Cálculo de materiales e inversión</li>
+                                    <li>Topología y Presupuesto Optico</li>
+                                    <li>Expedientes y Cálculo mecánico</li>
+                                    <li>Informe de instalación</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Herramientas y Procesos</h4>
+                        <ul>
+                            <li>Software: Google Earth, ArcGIS, AutoCAD</li>
+                            <li>Proceso incial:
+                                <ul>
+                                    <li>Estudio y cronograma</li>
+                                    <li>Levantamiento de información</li>
+                                    <li>Reconocimiento de postería</li>
+                                    <li>App móvil <span class="hl">APP</span></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÓDULO 05 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-globe-stand section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">05</span>
+                    <h2 class="module-title">Planta Externa - Práctica</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Pasa de la teoría a la acción dominando el 'Tridente del Diseño'. Aprenderás a ubicarte con Google Earth, procesar datos masivos con ArcGIS y desarrollar una topolgia profesional en AutoCAD.
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Google Earth <span class="hl text-white border-none bg-transparent pl-0">DISEÑO BASE</span></h4>
+                        <ul>
+                            <li>Instalación y Organización</li>
+                            <li>Creación de puntos/líneas/polígonos</li>
+                            <li>Simbologías y Diseño práctico</li>
+                        </ul>
+                        <br>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">ArcGIS <span class="hl text-white border-none bg-transparent pl-0">MATERIALES</span></h4>
+                        <ul>
+                            <li>Importar KMZ y editar Shapefiles</li>
+                            <li>Etiquetado automatizado (postes/NAPs)</li>
+                            <li>Selección de ferreterías y Armados</li>
+                            <li>Cálculo de materiales (Excel + ArcGIS)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">AutoCAD <span class="hl text-white border-none bg-transparent pl-0">TOPOLOGÍA</span></h4>
+                        <ul>
+                            <li>Importar de ArcGIS y Dibujo vectorial</li>
+                            <li>Comandos y Manejo de escalas</li>
+                            <li>Creación de catastro</li>
+                            <li>Topología (Balanceada/Desbalanceada):
+                                <ul>
+                                    <li>Simbologías y Desarrollo práctico</li>
+                                    <li>Derivación en mufas y Fusiones NAP</li>
+                                    <li>Asignación de hilos en nodo</li>
+                                </ul>
+                            </li>
+                            <li>Cálculo de potencia (Plantillas xlsx) e Impresión</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÓDULO 06 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-hard-drives section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">06</span>
+                    <h2 class="module-title">Planta Interna</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-4 relative z-10">
+                    Configura el cerebro de tu red. Aprende a dimensionar correctamente la OLT, los routers y el respaldo energético.
+                </p>
+                <div class="mb-8 p-4 bg-white/5 border-l-4 border-[#FCBF26] rounded-r-lg relative z-10">
+                    <p class="text-[#FCBF26] text-sm font-bold flex items-center gap-2">
+                        <i class="ph-bold ph-star"></i> Nota Especial:
+                    </p>
+                    <p class="text-gray-300 text-xs mt-1">
+                        Para esta sección tendremos un Ing. de Telecomunicaciones especializado invitado que dictará esta parte.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Equipamiento</h4>
+                        <ul>
+                            <li>Router Borde/Core y Switch Agregación</li>
+                            <li>Selección de OLT (Cálculo de capacidad)</li>
+                            <li>ODF, Gabinetes y Racks</li>
+                            <li>Banco de baterías y Puesta a tierra</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Lógica</h4>
+                        <ul>
+                            <li>Estructura de VLANs</li>
+                            <li>Configuración de OLT</li>
+                            <li>Creación de perfiles</li>
+                            <li>Gestión de software</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÓDULO 07 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-wrench section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">07</span>
+                    <h2 class="module-title">Operación y Mantenimiento</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Una red que no se mantiene, muere. Descubre las estrategias clave para prevenir fallas masivas y aprende a resolver problemas rápidamente.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Estrategias</h4>
+                        <ul>
+                            <li>Mantenimiento Preventivo</li>
+                            <li>Mantenimiento Correctivo</li>
+                            <li>Mantenimiento Predictivo</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Resolución</h4>
+                        <ul>
+                            <li>Herramientas Físicas y Lógicas</li>
+                            <li>Tipos de problemas: Capa física vs Capa lógica</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÓDULO 08 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-folder-notch section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">08</span>
+                    <h2 class="module-title">Documentación de Red</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    El orden es dinero. Aprende a registrar y mantener actualizado el inventario de casa hilo y puerto para que tu red sea un activo valorable.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Generalidades e Importancia</h4>
+                        <ul>
+                            <li>Inventario de puertos</li>
+                            <li>Agilidad en reparaciones</li>
+                            <li>Valoración de empresa</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Actualización Permanente</h4>
+                        <ul>
+                            <li>Unifilares</li>
+                            <li>Digramas georeferenciados</li>
+                            <li>Planos As-Built</li>
+                            <li>Software utilizados (Google Earth, ArcGIS, AutoCAD)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MÓDULO 09 -->
+            <div class="course-card">
+                <i class="ph-duotone ph-file-text section-icon-bg"></i>
+                <div class="module-header">
+                    <span class="module-number">09</span>
+                    <h2 class="module-title">Elaboración de Expedientes</h2>
+                </div>
+                <p class="text-gray-300 italic text-sm mb-8 border-b border-white/10 pb-4 relative z-10">
+                    Formaliza tu proyecto. Te enseñaremos a generar todos los planos y documentos técnicos exigidos por concesionarias y municipios.
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 tech-list">
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Planografía</h4>
+                        <ul>
+                            <li>Planos: Ubicación, Tendido, Seguridad, Corte vial</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[#FCBF26] font-bold text-xs uppercase mb-4 tracking-widest border-b border-[#FCBF26]/30 pb-1 inline-block">Complementarios</h4>
+                        <ul>
+                            <li>Relación de postes UTM</li>
+                            <li>Memoria descriptiva</li>
+                            <li>Cálculos justificativos</li>
+                            <li>Especificaciones Técnicas y Detalle de armados</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- INFO FINAL (Footer del curso) -->
+        <div class="mt-20 bg-gradient-to-r from-[#161521] to-[#100F1D] border border-white/10 rounded-xl p-8 flex flex-col md:flex-row justify-between items-center gap-8 shadow-2xl">
+            <div class="w-full md:w-2/3">
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <span class="block text-[#FCBF26] font-black text-xs uppercase mb-1">Fecha de Inicio</span>
+                        <span class="text-white font-bold text-lg">19 de Enero de 2026</span>
+                    </div>
+                    <div>
+                        <span class="block text-[#FCBF26] font-black text-xs uppercase mb-1">Modalidad</span>
+                        <span class="text-white font-bold text-lg">Online vía Google Meet</span>
+                    </div>
+                    <div>
+                        <span class="block text-[#FCBF26] font-black text-xs uppercase mb-1">Horario</span>
+                        <span class="text-white font-bold text-lg">L - M - V | 7:00 PM - 9:00 PM</span>
+                    </div>
+                    <div>
+                        <span class="block text-[#FCBF26] font-black text-xs uppercase mb-1">Duración</span>
+                        <span class="text-white font-bold text-lg">3 Semanas (24 Horas)</span>
+                    </div>
+                </div>
+                <p class="text-gray-500 text-xs italic mt-6 border-t border-white/5 pt-4">* Incluye Software y Sesiones Prácticas</p>
+            </div>
+            
+            <!-- Logo Inferior Corregido -->
+             <div class="h-20 flex items-center justify-center opacity-50 grayscale hover:grayscale-0 transition-all px-6">
+                <img src="C:\eva\img\LOGO_eva.png" alt="Logo Inferior" class="h-full w-auto object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'text-2xl font-bold text-gray-700\'>EVA</span>'">
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER SIMPLE -->
+    <footer class="text-center mt-20 text-gray-600 text-xs uppercase tracking-widest font-bold">
+        Programa de Especialización Profesional
+    </footer>
+
+</body>
+</html>
