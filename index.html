@@ -2,7 +2,7 @@
 <html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eva - Soluciones Integrales</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,15 +27,23 @@
             --text-muted: #9CA3AF;
         }
         
-        /* Ajuste de scroll en 0 ya que el menú se oculta */
-        html { scroll-padding-top: 0; }
+        /* Ajuste de scroll y PREVENCIÓN DE SCROLL LATERAL */
+        html, body { 
+            scroll-padding-top: 0; 
+            overflow-x: hidden; /* CRÍTICO: Evita desplazamiento lateral */
+            width: 100%; 
+            max-width: 100vw;
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
         
         body { 
             font-family: 'Open Sans', sans-serif; 
             background-color: var(--bg-main); 
             color: var(--text-main);
-            overflow-x: hidden;
         }
+
         h1, h2, h3, h4, .font-heading, .logo-text { font-family: 'Montserrat', sans-serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
@@ -57,7 +65,7 @@
             background: radial-gradient(circle at center, rgba(16, 15, 29, 0.7) 0%, rgba(16, 15, 29, 0.0) 85%);
             pointer-events: none;
         }
-        .hero-content-layer { position: relative; z-index: 20; pointer-events: auto; }
+        .hero-content-layer { position: relative; z-index: 20; pointer-events: auto; width: 100%; overflow-x: hidden; }
         
         .fade-in-up {
             opacity: 0;
@@ -73,7 +81,7 @@
         /* --- CANVAS BACKGROUNDS --- */
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; pointer-events: none; }
         #hero-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .hero-content { position: relative; z-index: 10; pointer-events: none; }
+        .hero-content { position: relative; z-index: 10; pointer-events: none; width: 100%; }
         .hero-content * { pointer-events: auto; }
 
         /* --- BADGES NOSOTROS --- */
@@ -84,6 +92,8 @@
             position: relative;
             padding: 1rem 0;
             height: 180px; 
+            max-width: 100%;
+            overflow: visible; 
         }
         
         .static-badge-card {
@@ -102,8 +112,22 @@
             justify-content: center;
             position: relative;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
         
+        /* Ajuste responsivo para móviles pequeños */
+        @media (max-width: 480px) {
+            .static-badge-card {
+                width: 100px;
+                height: 100px;
+                padding: 0.5rem;
+            }
+            .badge-icon { font-size: 1.4rem !important; margin-bottom: 0.2rem !important; }
+            .static-badge-card h3 { font-size: 0.9rem !important; }
+            .badge-down { margin-left: -5px; margin-right: -5px; margin-top: 2.5rem; }
+            .badge-lifted { margin-left: -5px; margin-top: -1.5rem; }
+        }
+
         .badge-up { margin-top: 0; }
         .badge-down {
             margin-top: 4rem; 
@@ -387,14 +411,51 @@
         }
         .highlight-flash { animation: highlightPulse 1.5s ease-out forwards; }
 
-        /* --- SERVICIOS FLIP CARDS --- */
+        /* --- SERVICIOS FLIP CARDS (CSS GRID AUTO-HEIGHT) --- */
         .service-grid-layout { display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.5rem; }
         @media (min-width: 768px) { .service-grid-layout { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 1024px) { .service-grid-layout { grid-template-columns: repeat(3, 1fr); } .col-span-desk-2 { grid-column: span 2; } }
 
-        .flip-card { position: relative; height: 350px; width: 100%; cursor: pointer; perspective: 1000px; }
-        .flip-inner { position: relative; width: 100%; height: 100%; }
-        .card-face { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 1rem; transition: all 0.4s ease; overflow: hidden; display: flex; flex-direction: column; }
+        /* Estructura Grid para auto-ajuste de altura */
+        .flip-card { 
+            position: relative; 
+            width: 100%; 
+            perspective: 1000px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            /* Grid para superponer caras */
+            display: grid;
+            grid-template-areas: "stack";
+        }
+
+        /* CAMBIO 2: ALTURA DE TARJETAS PRINCIPALES EN MÓVIL (AJUSTADO A 400PX) */
+        @media (max-width: 1024px) {
+            .card-highlight.flip-card {
+                min-height: 400px; /* Reducido de 540px a 400px como solicitaste */
+            }
+        }
+        
+        .flip-inner { 
+            position: relative; 
+            width: 100%; 
+            /* Inner también Grid */
+            display: grid;
+            grid-template-areas: "stack";
+            grid-area: stack;
+        }
+
+        .card-face { 
+            /* Ambas caras ocupan el mismo espacio "stack" */
+            grid-area: stack;
+            position: relative; /* Cambiado de absolute a relative para que empujen el alto */
+            width: 100%; 
+            min-height: 350px; /* Altura mínima base */
+            border-radius: 1rem; 
+            transition: all 0.4s ease; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+        }
         
         /* DISEÑO DE TARJETA SERVICIOS (Originales) */
         .card-front { 
@@ -407,11 +468,27 @@
         }
         .card-silver .card-front { background: var(--bg-card); border: 1px solid #4B5563; }
         
-        .card-back { z-index: 1; opacity: 0; transform: scale(0.95); padding: 1.2rem 1.5rem; align-items: flex-start; justify-content: flex-start; background: linear-gradient(145deg, #1C1B29 0%, #100F1D 100%); border: 1px solid var(--accent); }
+        .card-back { 
+            z-index: 1; 
+            opacity: 0; 
+            transform: scale(0.95); 
+            padding: 1.2rem 1.5rem; 
+            align-items: flex-start; 
+            justify-content: flex-start; 
+            background: linear-gradient(145deg, #1C1B29 0%, #100F1D 100%); 
+            border: 1px solid var(--accent); 
+        }
         
-        /* HOVER FIX IMPORTANTE */
-        .flip-card:hover .card-front { opacity: 0; transform: scale(1); pointer-events: none; }
-        .flip-card:hover .card-back { opacity: 1; transform: scale(1); z-index: 20; pointer-events: auto; }
+        /* HOVER Y ESTADO FLIPPED (MÓVIL) */
+        @media (min-width: 1025px) {
+            .flip-card:hover .card-front { opacity: 0; transform: scale(1); pointer-events: none; }
+            .flip-card:hover .card-back { opacity: 1; transform: scale(1); z-index: 20; pointer-events: auto; }
+            .flip-card:hover .segment-tag { opacity: 1; }
+        }
+
+        .flip-card.is-flipped .card-front { opacity: 0; transform: scale(1); pointer-events: none; }
+        .flip-card.is-flipped .card-back { opacity: 1; transform: scale(1); z-index: 20; pointer-events: auto; }
+        .flip-card.is-flipped .segment-tag { opacity: 1; }
 
         .card-number { position: absolute; top: 15px; right: 25px; font-size: 4rem; font-weight: 900; color: rgba(255,255,255,0.03); font-family: 'Montserrat', sans-serif; line-height: 1; }
         .circuit-lines { position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background-image: radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.03) 0%, transparent 70%); }
@@ -433,7 +510,7 @@
             letter-spacing: 0.2em; text-transform: uppercase;
             opacity: 0.6; transition: opacity 0.3s ease;
         }
-        .flip-card:hover .segment-tag { opacity: 1; }
+        
         .seg-isp { color: var(--accent); text-shadow: 0 0 10px rgba(252, 191, 38, 0.2); }
         .seg-b2b { color: #9CA3AF; }
         .seg-hybrid { color: #E5E7EB; opacity: 0.4; } 
@@ -483,9 +560,18 @@
             border-color: rgba(252, 191, 38, 0.3); 
         }
         
+        /* CAMBIO 3: PROYECTOS CON CLIC (IS-ACTIVE) PARA MÓVIL Y HOVER PARA DESKTOP */
         .card-layer-back { position: absolute; inset: 0; background: linear-gradient(to bottom, var(--bg-main), var(--bg-deep)); z-index: 20; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.2, 0, 0.2, 1); }
-        .slide-card-container:hover .card-layer-back { transform: translateY(0%); }
-        .slide-card-container:hover .card-layer-front { transform: translateY(-20%); opacity: 0.5; }
+        
+        /* REGLA ESPECÍFICA PARA ESCRITORIO (HOVER) */
+        @media (min-width: 1025px) {
+            .slide-card-container:hover .card-layer-back { transform: translateY(0%); }
+            .slide-card-container:hover .card-layer-front { transform: translateY(-20%); opacity: 0.5; }
+        }
+
+        /* REGLA GLOBAL PARA CLASE ACTIVE (MÓVIL Y CLICK) */
+        .slide-card-container.is-active .card-layer-back { transform: translateY(0%); }
+        .slide-card-container.is-active .card-layer-front { transform: translateY(-20%); opacity: 0.5; }
         
         .project-type-big { font-family: 'Montserrat', sans-serif; font-size: 3rem; font-weight: 900; color: rgba(255, 255, 255, 0.95); line-height: 1; text-transform: uppercase; text-align: center; text-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 2; }
         .project-type-medium { font-family: 'Montserrat', sans-serif; font-size: 1.7rem; font-weight: 900; color: rgba(255, 255, 255, 0.95); line-height: 1.1; text-transform: uppercase; text-align: center; text-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 2; padding: 0 1rem; }
@@ -605,7 +691,7 @@
                     Cursos
                 </a>
                 <!-- BOTÓN COTIZADORES MODIFICADO EN NUEVA PESTAÑA -->
-                <a href="calculadoras.html" target="_blank" class="px-5 py-2 rounded bg-white/10 text-white border border-white/20 text-xs font-bold uppercase tracking-widest hover:bg-[#FCBF26] hover:text-[#100F1D] hover:border-[#FCBF26] transition-all">
+                <a href="cotizador.html" target="_blank" class="px-5 py-2 rounded bg-white/10 text-white border border-white/20 text-xs font-bold uppercase tracking-widest hover:bg-[#FCBF26] hover:text-[#100F1D] hover:border-[#FCBF26] transition-all">
                     Cotizadores
                 </a>
             </nav>
@@ -625,7 +711,7 @@
         <!-- NUEVOS LINKS MOVIL EN NUEVA PESTAÑA -->
         <a href="cursos.html" target="_blank" class="text-sm font-bold text-[#FCBF26] uppercase tracking-widest border-b border-white/5 pb-3">Cursos</a>
         <!-- BOTÓN MÓVIL MODIFICADO EN NUEVA PESTAÑA -->
-        <a href="" target="_blank" class="text-sm font-bold text-white bg-white/10 border border-white/20 text-center py-3 rounded uppercase tracking-widest hover:bg-[#FCBF26] hover:text-[#100F1D] transition-all">Cotizadores</a>
+        <a href="cotizador.html" target="_blank" class="text-sm font-bold text-white bg-white/10 border border-white/20 text-center py-3 rounded uppercase tracking-widest hover:bg-[#FCBF26] hover:text-[#100F1D] transition-all">Cotizadores</a>
     </div>
 
     <!-- HERO SECTION -->
@@ -636,16 +722,17 @@
             <div class="hero-content max-w-5xl mx-auto flex flex-col items-center justify-center select-none">
                 <div class="relative w-full max-w-[280px] md:max-w-[500px] aspect-[3/1] flex items-center justify-center fade-in-up" style="animation-delay: 0.1s;">
                      <img src="img/LOGO_eva.png" alt="EVA Soluciones" class="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(252,191,38,0.2)]" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                     <h1 class="hidden logo-text text-7xl md:text-[140px] leading-none text-white select-none mix-blend-overlay opacity-90">
+                     <!-- Ajuste de tamaño de texto para móvil -->
+                     <h1 class="hidden logo-text text-5xl md:text-7xl lg:text-[140px] leading-none text-white select-none mix-blend-overlay opacity-90">
                         EV<span class="text-[#FCBF26]">A</span>
                     </h1>
                 </div>
                 
-                <p class="text-[#FCBF26] font-extrabold tracking-[0.25em] uppercase text-sm md:text-xl mt-6 border-t border-white/30 pt-6 w-full max-w-2xl mx-auto fade-in-up" style="animation-delay: 0.3s;">
+                <p class="text-[#FCBF26] font-extrabold tracking-[0.25em] uppercase text-xs md:text-sm lg:text-xl mt-6 border-t border-white/30 pt-6 w-full max-w-2xl mx-auto fade-in-up" style="animation-delay: 0.3s;">
                     INGENIERÍA EN TELECOMUNICACIONES
                 </p>
 
-                <h2 class="text-lg md:text-2xl mb-12 mt-8 leading-relaxed max-w-3xl mx-auto text-white font-normal tracking-wide font-heading fade-in-up" style="animation-delay: 0.5s;">
+                <h2 class="text-base md:text-lg lg:text-2xl mb-12 mt-8 leading-relaxed max-w-3xl mx-auto text-white font-normal tracking-wide font-heading fade-in-up" style="animation-delay: 0.5s;">
                     Especialistas en Diseño, Implementación y Documentación de Redes FTTH
                 </h2>
 
@@ -664,7 +751,7 @@
     </section>
 
     <!-- NOSOTROS SECTION COMPLETA -->
-    <section id="nosotros" class="py-24 relative bg-[#100F1D]">
+    <section id="nosotros" class="py-16 md:py-24 relative bg-[#100F1D]">
         <div class="container mx-auto max-w-6xl px-6 relative z-10">
             
             <!-- PARTE 1: NUESTRA FILOSOFÍA (Texto Izq - Badges Der) -->
@@ -674,10 +761,10 @@
                     <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-sm mb-6 block flex items-center gap-2">
                         <span class="w-8 h-[2px] bg-[#FCBF26]"></span> Nuestra Filosofía
                     </span>
-                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-8 leading-tight">
+                    <h2 class="text-2xl md:text-3xl lg:text-5xl font-bold text-white mb-8 leading-tight">
                         Más que una empresa, somos tu <span class="font-bold text-[#FCBF26]">Socio de Ingeniería</span>.
                     </h2>
-                    <p class="text-gray-400 leading-relaxed text-lg mb-4">
+                    <p class="text-gray-400 leading-relaxed text-base md:text-lg mb-4">
                         "Más que un proveedor externo, funcionamos como la extensión experta de tu propia empresa. Combinamos soluciones de ingeniería robustas con un trato directo y transparente, asegurando que cada desafío técnico se resuelva con agilidad y compromiso personal."
                     </p>
                 </div>
@@ -688,19 +775,19 @@
                         <!-- Badge 1 (Back): 5 Años -->
                         <div class="static-badge-card badge-up z-low">
                             <i class="ph-fill ph-medal badge-icon"></i>
-                            <h3 class="font-bold text-white text-xl">+5 Años</h3>
+                            <h3 class="font-bold text-white text-lg md:text-xl">+5 Años</h3>
                             <p class="text-[10px] text-gray-300 uppercase tracking-widest font-bold">Experiencia</p>
                         </div>
                         <!-- Badge 2 (Middle): Latam Center -->
                         <div class="static-badge-card badge-down z-mid">
                             <i class="ph-fill ph-globe-hemisphere-west badge-icon"></i>
-                            <h3 class="font-bold text-white text-xl">LATAM</h3>
+                            <h3 class="font-bold text-white text-lg md:text-xl">LATAM</h3>
                             <p class="text-[10px] text-gray-300 uppercase tracking-widest font-bold">Alcance</p>
                         </div>
                         <!-- Badge 3 (Front): Staff (Subida) -->
                         <div class="static-badge-card badge-up badge-lifted z-top">
                             <i class="ph-fill ph-users-three badge-icon"></i>
-                            <h3 class="font-bold text-white text-xl">Staff</h3>
+                            <h3 class="font-bold text-white text-lg md:text-xl">Staff</h3>
                             <p class="text-[10px] text-gray-300 uppercase tracking-widest font-bold">Ingenieros</p>
                         </div>
                     </div>
@@ -715,10 +802,10 @@
                     <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-sm mb-4 block flex items-center gap-2">
                         <span class="w-8 h-[2px] bg-[#FCBF26]"></span> NUESTRO ENFOQUE
                     </span>
-                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
+                    <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight">
                         Soluciones a la medida de tu <span class="text-[#FCBF26]">modelo de negocio</span>.
                     </h2>
-                    <p class="text-gray-400 text-lg leading-relaxed">
+                    <p class="text-gray-400 text-base md:text-lg leading-relaxed">
                         "Desarrollamos soluciones especializadas bajo dos enfoques: la creación de redes para ISPs y el soporte operativo para empresas de telecomunicaciones."
                     </p>
                 </div>
@@ -791,7 +878,7 @@
                             Confían en Nosotros <i class="ph-bold ph-arrow-right"></i>
                         </a>
                          <!-- ANCLAJE MODIFICADO: Con onclick para highlight -->
-                        <a href="#ruta-ingenieria" onclick="highlightSection('ruta-b2b')" class="sophisticated-link-secondary">
+                        <a href="#ruta-b2b" onclick="highlightSection('ruta-b2b')" class="sophisticated-link-secondary">
                             <i class="ph-bold ph-users-three"></i> Sinergia Operativa
                         </a>
                     </div>
@@ -808,7 +895,7 @@
             
             <div class="text-center mb-16">
                 <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-2 block">ECOSISTEMA DE INGENIERÍA</span>
-                <h2 class="text-3xl md:text-4xl font-heading font-bold text-white">El Valor de la Ingeniería</h2>
+                <h2 class="text-2xl md:text-3xl lg:text-4xl font-heading font-bold text-white">El Valor de la Ingeniería</h2>
             </div>
 
             <div class="ecosystem-grid">
@@ -907,6 +994,9 @@
                 <p class="text-gray-400 text-sm max-w-2xl mx-auto leading-relaxed">
                     Presentamos nuestros servicios estandarizados de ingeniería. Sin embargo, nuestro enfoque es inherentemente flexible: nos integramos a tus procesos singulares y resolvemos necesidades específicas más allá de este catálogo.
                 </p>
+                <p class="md:hidden text-[#FCBF26] text-xs mt-4 font-bold uppercase tracking-widest animate-pulse">
+                    <i class="ph-bold ph-hand-tap"></i> Toca las tarjetas para ver detalles
+                </p>
             </div>
 
             <!-- GRID INTERACTIVO -->
@@ -923,7 +1013,7 @@
                                 <span class="service-badge">SERVICIO PRINCIPAL</span>
                                 <i class="ph-fill ph-map-trifold text-5xl text-white mb-4 group-hover:text-[#FCBF26] transition-colors duration-500"></i>
                                 <!-- TÍTULO CAMBIADO -->
-                                <h3 class="card-title-front">DISEÑO HORIZONTAL<br> GPON</h3>
+                                <h3 class="card-title-front">DISEÑO HORIZONTAL<br>- GPON</h3>
                             </div>
                             <!-- TAG MODIFICADO -->
                             <div class="segment-tag seg-isp">ISP</div>
@@ -966,11 +1056,11 @@
                                         <p class="text-white text-[14px] leading-snug">BOM completo y cálculo CAPEX.</p>
                                     </div>
                                     
-                                    <!-- Botones integrados al final de la columna derecha - MÁS COMPACTOS -->
+                                    <!-- Botones integrados al final de la columna derecha - CAMBIO 1: ALTURA EN MÓVIL AUMENTADA (py-3) -->
                                     <div class="flex flex-col gap-2 mt-auto relative z-50 pt-2">
-                                        <!-- BOTONES: Se mantienen compactos para dar espacio al texto más grande. En nueva pestaña si es un PDF o herramienta -->
-                                        <a href="#" target="_blank" class="sophisticated-link-primary w-full text-center !py-1.5 !px-2 !text-[10px]"><i class="ph-bold ph-download-simple text-sm"></i> Brochure</a>
-                                        <a href="#" target="_blank" class="sophisticated-link-secondary w-full text-center !py-1.5 !px-2 !text-[10px]"><i class="ph-bold ph-calculator text-sm"></i> Cotizador</a>
+                                        <!-- BOTONES: Responsive (Grandes en móvil / Compactos en desktop con md:) -->
+                                        <a href="#" target="_blank" class="sophisticated-link-primary w-full text-center py-3 text-xs md:!py-1.5 md:!px-2 md:!text-[10px]"><i class="ph-bold ph-download-simple text-sm"></i> Brochure</a>
+                                        <a href="#" target="_blank" class="sophisticated-link-secondary w-full text-center py-3 text-xs md:!py-1.5 md:!px-2 md:!text-[10px]"><i class="ph-bold ph-calculator text-sm"></i> Cotizador</a>
                                     </div>
                                 </div>
                             </div>
@@ -1231,14 +1321,14 @@
                         LO HACEMOS <span class="text-[#FCBF26]">FÁCIL</span>
                     </h2>
                     <p class="text-sm text-gray-400 font-normal leading-relaxed max-w-lg">
-                        Olvídate de las esperas. Usa nuestra <strong class="text-white">Calculadoras personalizadas para cotizar cada uno de nuestros servicios</strong> y obtén una estimación de inversión para tu proyecto en segundos.
+                        Olvídate de las esperas. Usa nuestro <strong class="text-white">Cotizador Inteligente</strong> y obtén una estimación de inversión para tu proyecto en segundos.
                     </p>
                  </div>
             </div>
 
             <!-- Botón Derecha EN NUEVA PESTAÑA -->
             <div class="shrink-0">
-                 <a href="calculadoras.html" target="_blank" class="group relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-bold text-white transition-all duration-300 bg-transparent rounded border border-[#FCBF26] hover:bg-[#FCBF26]/10 hover:shadow-[0_0_20px_rgba(252,191,38,0.3)]">
+                 <a href="cotizador.html" target="_blank" class="group relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-bold text-white transition-all duration-300 bg-transparent rounded border border-[#FCBF26] hover:bg-[#FCBF26]/10 hover:shadow-[0_0_20px_rgba(252,191,38,0.3)]">
                     <span class="uppercase tracking-widest text-xs group-hover:text-[#FCBF26] transition-colors flex items-center gap-2">
                         Calcular Ahora <i class="ph-bold ph-caret-right text-lg"></i>
                     </span>
@@ -1266,6 +1356,9 @@
                 <span class="prog-highlight">AutoCAD</span> y 
                 <span class="prog-highlight">Google Earth</span>. 
                 A través de una conversación constante con el cliente final, transformamos datos crudos en un producto de calidad superior.
+            </p>
+             <p class="md:hidden text-[#FCBF26] text-xs mt-4 font-bold uppercase tracking-widest animate-pulse">
+                <i class="ph-bold ph-hand-tap"></i> Toca los proyectos para ver detalles
             </p>
         </div>
 
@@ -1712,6 +1805,11 @@
 
     <!-- Scripts de Animación y Lógica Principal (Combinados) -->
     <script>
+        // DETECCIÓN DE MÓVIL (Simple ancho de pantalla)
+        function isMobileDevice() {
+            return window.innerWidth < 768;
+        }
+
         // --- 1. LÓGICA DEL MENÚ INTELIGENTE (SCROLL) ---
         let lastScrollTop = 0;
         const header = document.getElementById('main-header');
@@ -1751,6 +1849,44 @@
             }
         }
 
+        // --- 1.2 FUNCIONALIDAD TÁCTIL PARA TARJETAS FLIP (MÓVIL) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const flipCards = document.querySelectorAll('.flip-card');
+            
+            flipCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // En desktop, el hover se encarga. En móvil, usamos click/tap.
+                    if (isMobileDevice() || window.matchMedia("(pointer: coarse)").matches) {
+                        // Si ya está volteada, quizás queramos cerrarla o simplemente no hacer nada y dejar que otro click afuera cierre, 
+                        // pero aquí haremos toggle para simpleza
+                        this.classList.toggle('is-flipped');
+                        
+                        // Opcional: Cerrar otras tarjetas
+                        flipCards.forEach(otherCard => {
+                            if (otherCard !== card) {
+                                otherCard.classList.remove('is-flipped');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // CAMBIO 3 JS: FUNCIONALIDAD TÁCTIL PARA TARJETAS DE PROYECTO
+            const projectCards = document.querySelectorAll('.slide-card-container');
+            projectCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Solo activar en móvil
+                    if (isMobileDevice() || window.matchMedia("(pointer: coarse)").matches) {
+                        this.classList.toggle('is-active');
+                        // Cerrar otras tarjetas de proyecto
+                        projectCards.forEach(other => {
+                            if (other !== card) other.classList.remove('is-active');
+                        });
+                    }
+                });
+            });
+        });
+
         // --- 2. LÓGICA DEL NUEVO HERO (Principal EVA) ---
         const heroCanvas = document.getElementById('hero-canvas');
         let hCtx, hW, hH;
@@ -1774,7 +1910,7 @@
         }
         
         window.addEventListener('mousemove', function(event) {
-            if (!heroCanvas) return;
+            if (!heroCanvas || isMobileDevice()) return; // Desactivar en móvil
             const rect = heroCanvas.getBoundingClientRect();
             mouse.x = event.clientX - rect.left;
             mouse.y = event.clientY - rect.top;
@@ -1788,6 +1924,7 @@
         const inicioSection = document.getElementById('inicio');
         if (inicioSection) {
             inicioSection.addEventListener('click', function(e) {
+                if (isMobileDevice()) return; // Desactivar creación de nodos en móvil
                 if (nodes.length > 600 || !heroCanvas) return; 
                 const rect = heroCanvas.getBoundingClientRect();
                 let n = new Node(e.clientX - rect.left, e.clientY - rect.top);
@@ -1812,7 +1949,9 @@
                 if (this.baseY <= 0 || this.baseY >= hH) { this.vy *= -1; this.baseY = Math.max(0, Math.min(this.baseY, hH)); }
 
                 let targetX = this.baseX; let targetY = this.baseY;
-                if (mouse.x !== undefined && mouse.isMoving) {
+                
+                // Efecto de mouse SOLO si NO es móvil
+                if (!isMobileDevice() && mouse.x !== undefined && mouse.isMoving) {
                     let dx = mouse.x - this.baseX; let dy = mouse.y - this.baseY;
                     let dist = Math.sqrt(dx*dx + dy*dy);
                     if (dist < CONFIG.MOUSE_RADIUS) {
@@ -1941,7 +2080,9 @@
             if (!hCtx) return;
 
             nodes = []; pulses = [];
-            let count = Math.floor(hW * hH / CONFIG.NODE_DENSITY_DIVISOR); 
+            // Menos densidad de nodos en móvil para rendimiento
+            let divisor = isMobileDevice() ? 8000 : CONFIG.NODE_DENSITY_DIVISOR;
+            let count = Math.floor(hW * hH / divisor); 
             for(let i=0; i<count; i++) nodes.push(new Node(Math.random()*hW, Math.random()*hH)); 
             initAnchors();
             pulses.push(new Pulse()); 
