@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EVA - Soluciones Integrales</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Manrope:wght@300;400;600&family=Open+Sans:wght@300;400;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Iconos Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- LEAFLET MAPS (CSS) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- SCRIPT DE LEAFLET PARA EL MAPA -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <style>
+        /* --- BRANDING EVA DARK THEME --- */
+        :root {
+            --bg-main: #100F1D;      /* Azul Profundo Base */
+            --bg-deep: #0A0912;      /* Contraste Oscuro */
+            --bg-card: #161521;      /* Tarjetas/Paneles */
+            --bg-sidebar: #0e0d19;   /* Sidebar */
+            --accent: #FCBF26;       /* Amarillo Dorado */
+            --text-main: #F3F4F6;
+            --text-muted: #E5E7EB;   /* Texto claro para menu */
+        }
+        
+        body { 
+            font-family: 'Open Sans', sans-serif; 
+            background-color: var(--bg-deep); 
+            color: var(--text-main);
+            overflow: hidden; 
+            height: 100vh;
+        }
+        
+        h1, h2, h3, h4, .font-heading { font-family: 'Montserrat', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Inputs Numéricos */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* --- BACKGROUND CANVAS --- */
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; pointer-events: none; }
+
+        /* --- LAYOUT DASHBOARD --- */
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        /* SIDEBAR (Desktop) */
+        .sidebar {
+            background: rgba(16, 15, 29, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            z-index: 50;
+        }
+
+        /* HEADER MOBILE */
+        .mobile-header {
+            display: none;
+            background: rgba(16, 15, 29, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            z-index: 60;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px; 
+            margin-bottom: 8px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-weight: 600; 
+            font-size: 0.95rem; 
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1); 
+            color: #fff;
+            transform: translateX(5px);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .menu-item.active {
+            background: rgba(252, 191, 38, 0.15);
+            color: var(--accent);
+            border-color: rgba(252, 191, 38, 0.5); 
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(252, 191, 38, 0.1);
+        }
+
+        .menu-item i { font-size: 1.4rem; }
+
+        /* MOBILE NAV */
+        .mobile-nav { display: none; }
+
+        /* MAIN CONTENT */
+        .main-content {
+            position: relative;
+            overflow-y: auto;
+            padding: 2rem;
+            background: radial-gradient(circle at top right, rgba(252, 191, 38, 0.03), transparent 40%);
+            scroll-behavior: smooth;
+            height: 100vh;
+        }
+
+        /* --- MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                height: 100%;
+                overflow: hidden;
+            }
+            .sidebar { display: none; }
+            .mobile-header { display: flex; }
+            .main-content {
+                padding: 1rem;
+                padding-top: 80px;
+                padding-bottom: 100px;
+                height: 100vh;
+            }
+            .mobile-nav {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background: rgba(14, 13, 25, 0.95);
+                backdrop-filter: blur(12px);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 8px 4px;
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+                z-index: 100;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            }
+            .mobile-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                color: #9CA3AF;
+                padding: 8px 0;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            .mobile-nav-item i { font-size: 1.5rem; margin-bottom: 2px; }
+            .mobile-nav-item span { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+            .mobile-nav-item.active { color: var(--accent); background: rgba(252, 191, 38, 0.1); }
+            .mobile-nav-item.active i { transform: translateY(-2px); }
+        }
+
+        /* PANELES (Views) */
+        .view-panel {
+            display: none !important; 
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .view-panel.active-view {
+            display: block !important;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Utils */
+        .wizard-step { display: none; animation: fadeIn 0.4s ease-out; }
+        .wizard-step.active-step { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        @keyframes border-pulse {
+            0% { border-color: rgba(239, 68, 68, 0.2); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            50% { border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 0 10px 0 rgba(239, 68, 68, 0.2); }
+            100% { border-color: rgba(239, 68, 68, 0.2); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .tag-peru { animation: border-pulse 2s infinite; }
+
+        .radio-card-input:checked + .radio-card {
+            border-color: var(--accent);
+            background-color: rgba(252, 191, 38, 0.05);
+            box-shadow: 0 0 20px rgba(252, 191, 38, 0.1);
+        }
+        .radio-card-input:checked + .radio-card .check-icon { opacity: 1; transform: scale(1); }
+        .map-wrapper { transition: height 0.3s ease; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- FONDO ANIMADO -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- HEADER MOBILE -->
+    <div class="mobile-header">
+        <div class="flex items-center gap-3">
+            <img src="img\LOGO_eva.png" alt="EVA Logo" class="h-8 w-auto object-contain">
+            <span class="font-heading font-bold text-white text-lg tracking-widest">EVA TOOLS</span>
+        </div>
+        <a href="index.html" class="text-white/50 hover:text-white p-2"><i class="ph-bold ph-x text-xl"></i></a>
+    </div>
+
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar hidden md:flex">
+            <div class="mb-10 flex items-center gap-3 px-2">
+                <img src="img\LOGO_eva.png" alt="EVA Logo" class="h-12 w-auto object-contain">
+            </div>
+
+            <nav class="flex-1 space-y-2 nav-list w-full">
+                <div id="nav-home" class="menu-item active" onclick="switchView('view-home', this)">
+                    <i class="ph-bold ph-house"></i><span class="menu-text">Inicio</span>
+                </div>
+                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest px-4 mb-2 mt-6 border-b border-white/5 pb-2">Calculadoras</div>
+                <div id="nav-diseno" class="menu-item" onclick="switchView('view-diseno', this)"><i class="ph-bold ph-pencil-ruler"></i><span class="menu-text">Diseño Red GPON</span></div>
+                <div id="nav-exp" class="menu-item" onclick="switchView('view-expediente', this)"><i class="ph-bold ph-file-text"></i><span class="menu-text">Expedientes</span></div>
+                <div id="nav-imp" class="menu-item" onclick="switchView('view-implementacion', this)"><i class="ph-bold ph-wrench"></i><span class="menu-text">Implementación</span></div>
+                <div id="nav-act" class="menu-item" onclick="switchView('view-actualizacion', this)"><i class="ph-bold ph-arrows-clockwise"></i><span class="menu-text">Actualización</span></div>
+            </nav>
+
+            <div class="mt-auto border-t border-white/5 pt-6 px-2">
+                <a href="index.html" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors group">
+                    <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                    <span class="sidebar-footer-text text-xs font-bold uppercase tracking-wide">Volver al Inicio</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            
+            <!-- VIEW 0: INICIO -->
+            <div id="view-home" class="view-panel active-view h-full relative" style="min-height: 80vh;">
+                <div class="w-full h-full flex flex-col items-center justify-center relative z-10 py-10">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+                        <div class="w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-[#FCBF26]/5 rounded-full blur-[80px] md:blur-[120px]"></div>
+                    </div>
+                    
+                    <div class="text-center px-4 max-w-3xl mx-auto flex flex-col items-center">
+                        <img src="img\LOGO_eva.png" alt="EVA Logo" class="h-32 md:h-48 w-auto object-contain mb-6 drop-shadow-2xl animate-[fadeIn_1s_ease-out]">
+                        
+                        <p class="text-gray-400 text-xs md:text-base font-medium uppercase tracking-[0.3em] mb-8">
+                            Soluciones Integrales
+                        </p>
+                        
+                        <div class="bg-[#161521]/50 backdrop-blur-sm border border-white/5 rounded-2xl p-6 md:p-8 mb-10 shadow-2xl w-full">
+                            <p class="text-gray-300 text-sm md:text-base leading-relaxed mb-6">
+                                Aquí encontrarás las calculadoras para presupuestar tu proyecto. Recuerda que son 
+                                <strong class="text-[#FCBF26]">cálculos referenciales</strong>. Para una cotización final, es recomendable contactar con un asesor de la empresa.
+                            </p>
+                            <a href="https://wa.me/51914754413" target="_blank" class="w-full md:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase tracking-widest text-xs rounded-xl transition-all shadow-[0_4px_20px_rgba(37,211,102,0.2)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.4)] transform hover:-translate-y-1">
+                                <i class="ph-bold ph-whatsapp-logo text-xl"></i> Contactar con un Asesor
+                            </a>
+                        </div>
+                        
+                        <div class="w-full md:w-auto inline-flex items-center justify-center gap-3 text-[#100F1D] bg-[#FCBF26] font-black text-xs md:text-sm tracking-widest uppercase animate-pulse mt-4 px-6 py-4 rounded-full border border-[#FCBF26] shadow-[0_0_20px_rgba(252,191,38,0.4)] cursor-default">
+                            <i class="ph-bold ph-arrow-left hidden md:block text-xl"></i>
+                            <i class="ph-bold ph-arrow-down md:hidden text-xl"></i>
+                            <span class="text-center">Seleccione una herramienta del menú</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 1: DISEÑO GPON -->
+            <div id="view-diseno" class="view-panel">
+                <header class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6">
+                    <div>
+                        <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-1 block">Herramienta de Planificación</span>
+                        <h2 class="text-2xl md:text-3xl font-heading font-bold text-white leading-tight">Calculadora Diseño Red GPON / XGPON</h2>
+                        <p class="text-gray-400 text-sm mt-2 max-w-xl">Configure las características de su proyecto para obtener una estimación de inversión.</p>
+                    </div>
+                </header>
+
+                <div class="mb-10">
+                    <h3 class="text-white text-sm font-bold uppercase tracking-wide mb-4 flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center text-xs font-bold">1</span> Seleccione el Tipo de Diseño</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="tipo_diseno" value="estandar" class="radio-card-input sr-only" checked onchange="updateUIState()">
+                            <div class="radio-card h-full p-6 rounded-xl border border-white/10 bg-[#161521] hover:border-white/30 transition-all relative overflow-hidden flex flex-col">
+                                <div class="absolute top-4 right-4 check-icon opacity-0 transform scale-75 transition-all duration-300"><div class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center"><i class="ph-bold ph-check"></i></div></div>
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-10 h-10 rounded-lg bg-[#1A1B29] border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors"><i class="ph-bold ph-pencil-simple text-xl"></i></div>
+                                    <div><h4 class="text-white font-bold text-lg uppercase">Diseño Estándar</h4><span class="text-[10px] text-gray-500 font-mono font-bold tracking-wider">IDEAL PARA UNA RÁPIDA EJECUCIÓN</span></div>
+                                </div>
+                                <p class="text-gray-400 text-xs mb-4 leading-relaxed">Paquete técnico esencial para la implementación física de la red. Enfocado en funcionalidad y presupuesto.</p>
+                                <div class="mt-auto space-y-2 border-t border-white/5 pt-4">
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Estudio de Proyecto (ROI, Penetración)</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Levantamiento de Campo (Postes/HPs)</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Planos de tendido (PDF) y Cálculo de Materiales</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Red en digital editable (KMZ)</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Diagramas de Empalme y Presupuesto Óptico</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Expediente empresa eléctrica (Estándar)</span></div>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="tipo_diseno" value="integral" class="radio-card-input sr-only" onchange="updateUIState()">
+                            <div class="radio-card h-full p-6 rounded-xl border border-white/10 bg-[#161521] hover:border-white/30 transition-all relative overflow-hidden flex flex-col">
+                                <div class="absolute top-4 right-4 check-icon opacity-0 transform scale-75 transition-all duration-300"><div class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center"><i class="ph-bold ph-check"></i></div></div>
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-10 h-10 rounded-lg bg-[#1A1B29] border border-white/10 flex items-center justify-center text-[#FCBF26]"><i class="ph-bold ph-star text-xl"></i></div>
+                                    <div><h4 class="text-white font-bold text-lg uppercase">Diseño Integral</h4><span class="text-[10px] text-[#FCBF26] font-mono font-bold tracking-wider">PARA EXPEDIENTES ELÉCTRICOS</span></div>
+                                </div>
+                                <p class="text-gray-400 text-xs mb-4 leading-relaxed">Solución completa que incluye formatos exigidos por concesionarias eléctricas para permisos de uso de postes.</p>
+                                <div class="mt-auto space-y-2 border-t border-white/5 pt-4">
+                                    <div class="flex items-start gap-2 text-[11px] text-white font-bold"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Todo lo del plan Estándar +</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Red editable en KMZ / AutoCAD / ArcGIS</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Memoria descriptiva (armados, especificaciones)</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Cálculos de Esfuerzo Mecánico</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Expediente empresas eléctricas (Integral)</span></div>
+                                    <div class="flex items-start gap-2 text-[11px] text-gray-300"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i><span>Expediente permisos municipales</span></div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-10">
+                    <h3 class="text-white text-sm font-bold uppercase tracking-wide mb-4 flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center text-xs font-bold">2</span> Información de Campo</h3>
+                    <div class="bg-[#161521] border border-white/5 rounded-xl p-6">
+                        <p class="text-gray-400 text-sm mb-4 leading-relaxed">El servicio estándar e integral incluyen el levantamiento de información en campo. Sin embargo, si ya cuenta con esta información, o desea levantarla por su cuenta podemos optimizar el costo del proyecto.</p>
+                        <label class="flex items-start gap-3 p-4 bg-[#0A0912] border border-white/10 rounded-lg cursor-pointer hover:border-[#FCBF26]/30 transition-colors group">
+                            <input type="checkbox" id="info-levantada" class="mt-1 w-5 h-5 accent-[#FCBF26] bg-[#161521] border-white/20 rounded cursor-pointer" onchange="calcularPresupuesto()">
+                            <div><span class="block text-white text-sm font-bold group-hover:text-[#FCBF26] transition-colors">Ya cuento con el levantamiento / Deseo realizarlo yo</span><span class="block text-[#FCBF26] text-xs mt-1 font-bold">Se reducirá el costo del servicio.</span></div>
+                        </label>
+                        <p class="text-[11px] text-gray-500 mt-3 italic pl-2">* Si desea realizar el levantamiento por su cuenta, podemos capacitar a su personal para realizarlo bajo nuestros estándares técnicos.</p>
+                    </div>
+                </div>
+
+                <div class="mb-10">
+                    <h3 class="text-white text-sm font-bold uppercase tracking-wide mb-4 flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center text-xs font-bold">3</span> Defina el Área del Proyecto</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Ubicación del Proyecto</label>
+                            <input type="text" id="lugar-input" placeholder="Ej. Yanahuara, Arequipa" class="w-full bg-[#161521] border border-white/10 rounded-lg p-3 text-white text-sm focus:border-[#FCBF26] outline-none transition-colors">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Área Total (km²)</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="area-input" placeholder="0.00" class="w-full bg-[#161521] border border-white/10 rounded-lg p-3 text-white text-right font-mono font-bold text-lg focus:border-[#FCBF26] outline-none transition-colors">
+                                <span class="text-gray-500 font-bold text-sm">km²</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="manualCalculate()" class="w-full py-4 bg-gradient-to-r from-[#1A1B29] to-[#161521] border border-white/10 text-white font-bold uppercase tracking-widest text-xs rounded-xl hover:border-[#FCBF26] hover:text-[#FCBF26] transition-all shadow-lg flex items-center justify-center gap-2 group mb-8">
+                        Calcular Inversión <i class="ph-bold ph-calculator text-lg group-hover:rotate-12 transition-transform"></i>
+                    </button>
+
+                    <div onclick="toggleMap()" class="w-full p-5 rounded-xl border border-[#FCBF26]/30 bg-[#FCBF26]/5 relative group cursor-pointer hover:bg-[#FCBF26]/10 transition-all duration-300 shadow-[0_0_15px_rgba(252,191,38,0.05)] hover:shadow-[0_0_25px_rgba(252,191,38,0.1)]">
+                        <div class="flex items-center gap-5">
+                            <div class="w-12 h-12 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform"><i class="ph-bold ph-map-trifold text-2xl"></i></div>
+                            <div class="flex-1">
+                                <h4 class="text-white font-bold text-sm uppercase tracking-wide group-hover:text-[#FCBF26] transition-colors">¿No conoces el área exacta?</h4>
+                                <p class="text-gray-400 text-xs mt-1 leading-relaxed">Usa nuestra herramienta de mapa inteligente para dibujar tu zona y calcular el kilometraje.</p>
+                            </div>
+                            <div class="text-[#FCBF26] text-2xl group-hover:translate-y-1 transition-transform"><i class="ph-bold ph-caret-down"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- MAPA AGREGADO -->
+                    <div id="map-wrapper" class="hidden relative w-full h-[450px] md:h-[550px] bg-[#161521] rounded-xl border border-white/10 overflow-hidden shadow-2xl mt-4 animate-[fadeIn_0.3s_ease-out]">
+                        <div id="map-container" class="w-full h-full z-10 bg-[#0A0912]"></div>
+                        <div id="map-instructions" class="absolute top-4 left-4 z-[400] bg-[#100F1D]/90 backdrop-blur border border-white/10 p-3 rounded-lg max-w-[200px] shadow-lg pointer-events-none">
+                            <h5 class="text-[#FCBF26] text-[10px] font-bold uppercase mb-2">Instrucciones</h5>
+                            <ul class="text-[10px] text-gray-300 space-y-1.5">
+                                <li class="flex items-center gap-2"><i class="ph-bold ph-mouse-left-click"></i> Clic: Crear punto</li>
+                                <li class="flex items-center gap-2"><i class="ph-bold ph-mouse-right-click"></i> Clic Der: Eliminar punto</li>
+                                <li class="flex items-center gap-2"><i class="ph-bold ph-check text-green-500"></i> Botón: <i class="ph-bold ph-check"></i> Cerrar área</li>
+                            </ul>
+                        </div>
+                        <div class="absolute top-4 right-4 z-[400] flex flex-col gap-2 bg-[#161521] border border-white/10 p-1.5 rounded-lg shadow-xl backdrop-blur-md">
+                            <button type="button" onclick="undoLastPoint()" class="w-9 h-9 flex items-center justify-center rounded bg-white/5 hover:bg-white/20 text-white transition-colors"><i class="ph-bold ph-arrow-u-up-left"></i></button>
+                            <button type="button" onclick="clearMap()" class="w-9 h-9 flex items-center justify-center rounded bg-red-600 text-white hover:text-red-100 transition-colors"><i class="ph-bold ph-trash"></i></button>
+                            <button type="button" onclick="finishPolygon()" class="w-9 h-9 flex items-center justify-center rounded bg-[#FCBF26] text-[#100F1D] hover:bg-white transition-colors shadow-lg"><i class="ph-bold ph-check"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="calc-result-box" class="hidden flex-col gap-6 pt-6 border-t border-white/10 animate-[fadeIn_0.5s_ease-out] mb-12">
+                    <div id="large-project-warning" class="hidden bg-[#FCBF26]/10 border border-[#FCBF26]/30 p-4 rounded-lg flex items-start gap-3">
+                        <i class="ph-fill ph-warning text-[#FCBF26] text-xl mt-0.5"></i>
+                        <div><h4 class="text-[#FCBF26] font-bold text-sm">Proyecto de Gran Envergadura (>15 km²)</h4><p class="text-gray-400 text-xs mt-1">Para proyectos de esta magnitud, contacte directamente a ingeniería.</p></div>
+                    </div>
+                    <div class="bg-gradient-to-r from-[#161521] to-[#100F1D] border border-[#FCBF26]/30 rounded-2xl p-6 md:p-8 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
+                        <div class="relative z-10 w-full md:w-auto text-center md:text-left">
+                            <span class="block text-gray-400 text-[10px] uppercase tracking-widest mb-2 font-bold">Inversión Estimada (Referencial)</span>
+                            <div class="flex items-baseline justify-center md:justify-start gap-2 mb-2">
+                                <span id="calc-price-display" class="text-5xl font-mono font-bold text-[#FCBF26] tracking-tighter drop-shadow-lg">$0.00</span>
+                                <span class="text-sm font-bold text-gray-500 self-end mb-2">USD</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500 italic max-w-xs mx-auto md:mx-0 border-t border-white/5 pt-2 mt-2">* Precio calculado según tarifa ISP estándar.</p>
+                        </div>
+                        <div class="relative z-10 w-full md:max-w-md text-center md:text-right border-t md:border-t-0 md:border-l border-white/5 pt-6 md:pt-0 md:pl-8">
+                            <h4 class="text-white font-bold text-sm mb-2">¿Te parece viable?</h4>
+                            <p class="text-xs text-gray-400 mb-5 leading-relaxed">Sin formularios largos ni esperas. Al hacer clic, te enviaremos la cotización final directamente a tu WhatsApp.</p>
+                            <button type="button" onclick="contactarAsesor()" class="w-full py-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase tracking-widest text-xs rounded-xl transition-all duration-300 shadow-[0_4px_20px_rgba(37,211,102,0.2)] hover:shadow-[0_6px_25px_rgba(37,211,102,0.3)] flex items-center justify-center gap-3 transform hover:-translate-y-1 group relative overflow-hidden">
+                                <i class="ph-bold ph-whatsapp-logo text-xl animate-pulse"></i> 
+                                <span class="relative z-10">Solicitar Cotización Oficial</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: EXPEDIENTES -->
+            <div id="view-expediente" class="view-panel">
+                <header class="mb-8 border-b border-white/5 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-1 block">Gestión de Permisos</span>
+                        <h2 class="text-2xl md:text-3xl font-heading font-bold text-white">Asistente Expedientes</h2>
+                        <p class="text-gray-400 text-sm mt-2 max-w-xl">Cotice su gestión de alquiler de postes.</p>
+                    </div>
+                    <div>
+                        <span class="px-3 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/30 text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 w-fit tag-peru">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Peru.svg" alt="Peru" class="w-4 h-3 rounded-sm object-cover"> Exclusivo para Perú
+                        </span>
+                    </div>
+                </header>
+
+                <div class="max-w-4xl mx-auto">
+                    <!-- Progress Bar -->
+                    <div class="flex justify-between mb-8 relative px-2">
+                        <div class="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -z-10"></div>
+                        <div id="progress-bar" class="absolute top-1/2 left-0 h-0.5 bg-[#FCBF26] -z-10 transition-all duration-300" style="width: 0%"></div>
+                        <div class="w-8 h-8 rounded-full bg-[#FCBF26] text-[#100F1D] flex items-center justify-center font-bold text-xs relative z-10" id="step-dot-1">1</div>
+                        <div class="w-8 h-8 rounded-full bg-[#161521] border border-white/20 text-gray-500 flex items-center justify-center font-bold text-xs relative z-10" id="step-dot-2">2</div>
+                        <div class="w-8 h-8 rounded-full bg-[#161521] border border-white/20 text-gray-500 flex items-center justify-center font-bold text-xs relative z-10" id="step-dot-3">3</div>
+                        <div class="w-8 h-8 rounded-full bg-[#161521] border border-white/20 text-gray-500 flex items-center justify-center font-bold text-xs relative z-10" id="step-dot-4">4</div>
+                        <div class="w-8 h-8 rounded-full bg-[#161521] border border-white/20 text-gray-500 flex items-center justify-center font-bold text-xs relative z-10" id="step-dot-5">5</div>
+                    </div>
+
+                    <!-- STEP 1 -->
+                    <div id="step-1" class="wizard-step active-step bg-[#161521] border border-white/10 rounded-xl p-6 md:p-8">
+                        <h3 class="text-xl font-bold text-white mb-6">1. Requisitos de la Empresa Eléctrica</h3>
+                        <p class="text-gray-400 text-sm mb-6">¿Conoce la información requerida por la empresa eléctrica?</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <button onclick="setWizardData('requisitos', true); nextStep(2)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-white font-bold text-sm">Sí, los conozco</button>
+                            <button id="btn-no-req" onclick="toggleWarningReq()" class="p-4 border border-white/10 rounded-lg hover:border-red-400 hover:bg-red-500/10 transition-all text-white font-bold text-sm">No estoy seguro</button>
+                        </div>
+                        <div id="warning-req" class="hidden p-4 bg-yellow-500/5 border border-yellow-500/30 text-yellow-200 text-sm rounded-lg animate-[fadeIn_0.3s_ease-out]">
+                            <p class="mb-2">Es necesario conocerlos, pero podemos continuar.</p>
+                            <button onclick="setWizardData('requisitos', false); nextStep(2)" class="w-full px-5 py-3 bg-[#FCBF26] text-[#100F1D] text-xs font-bold uppercase rounded hover:bg-white transition-colors shadow-lg text-center">Continuar de todas formas</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2 -->
+                    <div id="step-2" class="wizard-step bg-[#161521] border border-white/10 rounded-xl p-6 md:p-8">
+                        <h3 class="text-xl font-bold text-white mb-6">2. Información de Campo</h3>
+                        <p class="text-gray-400 text-sm mb-6">¿Tiene la información técnica completa de los postes en base a los requisitos de la empresa eléctrica?</p>
+                        <div class="grid grid-cols-1 gap-4">
+                            <button onclick="setWizardData('info_completa', true); nextStep(3)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-left group"><span class="block text-white font-bold group-hover:text-[#FCBF26]">Sí, tengo la información</span><span class="text-xs text-gray-500">No requiere servicio de levantamiento.</span></button>
+                            <button onclick="setWizardData('info_completa', false); nextStep(3)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] hover:bg-[#FCBF26]/10 transition-all text-left group"><span class="block text-white font-bold group-hover:text-[#FCBF26]">No, necesito levantarla</span><span class="text-xs text-gray-500">Se incluirá el costo de personal en campo.</span></button>
+                        </div>
+                        <button onclick="prevStep(1)" class="mt-6 text-gray-400 text-xs hover:text-white flex items-center gap-2"><i class="ph-bold ph-arrow-left"></i> Atrás</button>
+                    </div>
+
+                    <!-- STEP 3 -->
+                    <div id="step-3" class="wizard-step bg-[#161521] border border-white/10 rounded-xl p-6 md:p-8 relative">
+                        <div class="flex flex-col md:flex-row gap-8">
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-white mb-6">3. Cantidad de Postes</h3>
+                                <div class="flex flex-col gap-3 mb-6">
+                                    <label class="flex items-center gap-3 cursor-pointer text-white p-3 rounded border border-white/10 bg-[#0A0912]"><input type="radio" name="wiz_postes_mode" value="input" checked onchange="toggleWizPostesMode()" class="accent-[#FCBF26] w-4 h-4"><span class="text-sm font-bold">Ingresar número</span></label>
+                                    <label class="flex items-center gap-3 cursor-pointer text-white p-3 rounded border border-white/10 bg-[#0A0912]"><input type="radio" name="wiz_postes_mode" value="mapa" onchange="toggleWizPostesMode()" class="accent-[#FCBF26] w-4 h-4"><span class="text-sm font-bold">Dibujar ruta en mapa</span></label>
+                                </div>
+                                <div id="wiz-postes-input" class="max-w-xs">
+                                    <div class="relative w-full mb-3">
+                                        <input type="number" id="wiz-num-postes" placeholder="Ej. 150" class="w-full bg-[#0A0912] border border-white/10 rounded-lg py-3 px-4 text-left text-white text-base font-bold focus:border-[#FCBF26] outline-none">
+                                        <span class="absolute right-4 top-3 text-gray-600 font-bold text-xs pointer-events-none pt-1">POSTES</span>
+                                    </div>
+                                    <button onclick="validatePostesAndNext()" class="w-full py-3 bg-[#FCBF26] text-[#100F1D] font-bold rounded-lg hover:bg-white transition-colors text-xs uppercase tracking-wide shadow-md">Siguiente</button>
+                                </div>
+                            </div>
+                            <div class="md:w-1/3 flex flex-col justify-start pt-2">
+                                <div class="p-4 bg-[#FCBF26]/5 border border-[#FCBF26]/20 rounded-lg">
+                                    <p class="text-xs text-gray-400 leading-relaxed mb-2">Si no conoce la cantidad de postes podemos calcular un estimado en base a la ruta de su fibra que desee regularizar.</p>
+                                    <p class="text-xs text-[#FCBF26] leading-relaxed font-bold">"Si selecciona 'Dibujar ruta en mapa' podrá dibujar sus rutas en un mapa interactivo."</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="wiz-postes-map" class="hidden animate-[fadeIn_0.3s_ease-out] border-t border-white/10 pt-6 mt-2">
+                            <div class="w-full h-[300px] bg-[#0A0912] rounded-xl border border-white/10 relative overflow-hidden group">
+                                <div id="wiz-map-container" class="w-full h-full z-10" style="cursor: crosshair;"></div>
+                                <div class="absolute top-3 left-3 z-[400] bg-[#161521]/90 backdrop-blur border border-white/10 p-3 rounded-lg shadow-xl pointer-events-none max-w-[200px]">
+                                    <h6 class="text-[#FCBF26] text-[10px] font-bold uppercase mb-1">Controles de Edición</h6>
+                                    <ul class="text-[10px] text-gray-300 space-y-1.5">
+                                        <li><span class="text-white font-bold">Clic Izq:</span> Añadir punto</li>
+                                        <li><span class="text-white font-bold">Clic Der:</span> Borrar último punto</li>
+                                        <li class="pt-2 border-t border-white/10 mt-1 text-[#FCBF26] leading-tight">Al terminar una línea puede dibujar otra automáticamente.</li>
+                                    </ul>
+                                </div>
+                                <div class="absolute top-3 right-3 z-[400] flex flex-col gap-2">
+                                    <button onclick="wizFinishLine()" class="p-2 bg-[#161521] text-white border border-white/20 rounded shadow-lg"><i class="ph-bold ph-scissors"></i></button>
+                                    <button onclick="wizClear()" class="p-2 bg-red-600 text-white border border-red-500/30 rounded shadow-lg"><i class="ph-bold ph-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex flex-col md:flex-row gap-4 justify-between items-center bg-[#0A0912] p-4 rounded-lg border border-white/10">
+                                <div><span class="text-xs text-gray-500 block uppercase tracking-wide">Estimación Total</span><div class="flex items-baseline gap-2"><span id="wiz-map-result" class="text-white font-mono font-bold text-2xl">0</span><span class="text-sm text-[#FCBF26] font-bold">Postes</span></div></div>
+                                <button onclick="nextStep(4)" class="w-full md:w-auto px-8 py-3 bg-[#FCBF26] text-[#100F1D] font-bold text-xs uppercase tracking-wider rounded hover:bg-white transition-colors shadow-lg">Confirmar <i class="ph-bold ph-check ml-1"></i></button>
+                            </div>
+                        </div>
+                        <button onclick="prevStep(2)" class="mt-6 text-gray-400 text-xs hover:text-white flex items-center gap-2"><i class="ph-bold ph-arrow-left"></i> Atrás</button>
+                    </div>
+
+                    <!-- STEP 4 -->
+                    <div id="step-4" class="wizard-step bg-[#161521] border border-white/10 rounded-xl p-6 md:p-8">
+                        <h3 class="text-xl font-bold text-white mb-6">4. Cálculos Justificativos</h3>
+                        <p class="text-gray-400 text-sm mb-6">¿En los requisitos piden cálculo de esfuerzo mecánico o justificación técnica?</p>
+                        <div class="grid grid-cols-1 gap-4">
+                            <button onclick="setWizardData('mecanico', true); nextStep(5)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] text-white font-bold text-left">Sí, lo piden</button>
+                            <button onclick="setWizardData('mecanico', false); nextStep(5)" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] text-white font-bold text-left">No, no lo piden</button>
+                        </div>
+                        <button onclick="prevStep(3)" class="mt-6 text-gray-400 text-xs hover:text-white flex items-center gap-2"><i class="ph-bold ph-arrow-left"></i> Atrás</button>
+                    </div>
+
+                    <!-- STEP 5 -->
+                    <div id="step-5" class="wizard-step bg-[#161521] border border-white/10 rounded-xl p-6 md:p-8">
+                        <h3 class="text-xl font-bold text-white mb-6">5. Firma de Ingeniero</h3>
+                        <p class="text-gray-400 text-sm mb-6">¿Desea que incluyamos la firma de un Ing. de Telecomunicaciones colegiado?</p>
+                        <div class="grid grid-cols-1 gap-4 mb-6">
+                            <button onclick="setWizardData('firma', true); showResult()" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] text-white font-bold text-left">Sí, incluir firma</button>
+                            <button onclick="setWizardData('firma', false); showResult()" class="p-4 border border-white/10 rounded-lg hover:border-[#FCBF26] text-white font-bold text-left">No es necesario</button>
+                        </div>
+                        <button onclick="prevStep(4)" class="mt-6 text-gray-400 text-xs hover:text-white flex items-center gap-2"><i class="ph-bold ph-arrow-left"></i> Atrás</button>
+                    </div>
+
+                    <!-- RESULTADO FINAL -->
+                    <div id="wizard-result" class="wizard-step">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                            <!-- Left Card -->
+                            <div class="bg-[#161521] border border-white/10 rounded-xl p-6">
+                                <h4 class="text-white text-xs font-bold uppercase tracking-wide mb-4 flex items-center gap-2 pb-3 border-b border-white/10">
+                                    <i class="ph-duotone ph-file-doc text-[#FCBF26]"></i> EXPEDIENTE INTEGRAL
+                                </h4>
+                                <ul id="wiz-entregables-list" class="space-y-3"></ul>
+                            </div>
+                            <!-- Right Card -->
+                            <div class="bg-gradient-to-br from-[#161521] to-[#0e0d19] border border-[#FCBF26]/30 rounded-xl p-6 relative overflow-hidden flex flex-col justify-between shadow-2xl">
+                                <div>
+                                    <span class="block text-gray-400 text-[10px] uppercase tracking-widest mb-2 font-bold">Total Inversión Estimada</span>
+                                    <div class="flex items-baseline gap-2 mb-2">
+                                        <span class="text-3xl font-bold text-[#FCBF26]">S/</span>
+                                        <span id="wiz-total-display" class="text-5xl font-mono font-bold text-[#FCBF26] tracking-tighter drop-shadow-lg">0.00</span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 italic">* Precio referencial Perú.</p>
+                                </div>
+                                <div class="mt-6 pt-6 border-t border-white/5">
+                                    <h4 class="text-white font-bold text-sm mb-2">¿Te parece viable?</h4>
+                                    <p class="text-xs text-gray-400 mb-4 leading-relaxed">Sin formularios largos ni esperas. Al hacer clic, te enviaremos la cotización final directamente a tu WhatsApp.</p>
+                                    <button onclick="contactarWizard()" class="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase tracking-widest text-xs rounded-xl shadow-lg flex items-center justify-center gap-2">
+                                        <i class="ph-bold ph-whatsapp-logo text-lg"></i> Solicitar Cotización
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="resetWizard()" class="mx-auto flex items-center gap-2 px-8 py-3 border border-white/10 rounded-full text-gray-400 text-xs font-bold uppercase hover:bg-white/5 hover:border-[#FCBF26]">
+                            <i class="ph-bold ph-arrows-counter-clockwise"></i> Volver a calcular
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: IMPLEMENTACIÓN -->
+            <div id="view-implementacion" class="view-panel">
+                <header class="mb-8 border-b border-white/5 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-1 block">Despliegue de Red</span>
+                        <h2 class="text-2xl md:text-3xl font-heading font-bold text-white">Calculadora de Implementación</h2>
+                        <p class="text-gray-400 text-sm mt-2 max-w-xl">Cotización detallada de mano de obra para Planta Externa e Interna.</p>
+                    </div>
+                    <div>
+                        <span class="px-3 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 w-fit">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cf/Flag_of_Peru.svg" alt="Peru" class="w-4 h-3 rounded-sm object-cover"> Exclusivo Perú
+                        </span>
+                        <a href="https://wa.me/51914754413" target="_blank" class="text-[9px] text-[#FCBF26] block mt-1 hover:underline text-right">¿Otro país? Contáctanos</a>
+                    </div>
+                </header>
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                    <div class="xl:col-span-2 space-y-6">
+                        <div class="bg-[#161521] border border-white/10 rounded-xl p-6">
+                            <h3 class="text-white font-bold text-sm uppercase mb-4 flex items-center gap-2 border-b border-white/5 pb-3"><i class="ph-bold ph-globe text-[#FCBF26]"></i> Planta Externa</h3>
+                            <p class="text-xs text-gray-400 mb-4">Ingrese las cantidades a implementar:</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Fibra Óptica (km)</label><input type="number" id="imp-km" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcImplementacion()"></div>
+                                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Cajas NAP (Und)</label><input type="number" id="imp-naps" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcImplementacion()"></div>
+                                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Mufas (Und)</label><input type="number" id="imp-mufas" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcImplementacion()"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Planta Interna -->
+                        <div class="bg-[#161521] border border-white/10 rounded-xl p-6">
+                             <h3 class="text-white font-bold text-sm uppercase mb-6 flex items-center gap-2 border-b border-white/5 pb-3"><i class="ph-bold ph-server text-[#FCBF26]"></i> Planta Interna</h3>
+                             <div class="flex flex-col md:flex-row gap-8 items-start">
+                                <div class="flex-1">
+                                    <label class="flex items-center gap-3 cursor-pointer group w-fit mb-4">
+                                        <input type="checkbox" id="imp-check-nodo" class="w-4 h-4 accent-[#FCBF26] bg-[#0A0912] border-white/20 rounded cursor-pointer" onchange="toggleImpNodoInput()">
+                                        <span class="text-gray-300 text-xs font-bold">Requiere implementación de Nodo</span>
+                                    </label>
+                                    <div id="imp-nodo-container" class="hidden pl-0 md:pl-7">
+                                        <label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Cantidad de Nodos</label>
+                                        <input type="number" id="imp-nodos" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcImplementacion()">
+                                    </div>
+                                </div>
+                                <div class="flex-1 border-l border-white/10 pl-6">
+                                    <h5 class="text-xs font-bold text-[#FCBF26] uppercase mb-2">Alcance del Servicio</h5>
+                                    <ul class="text-xs text-gray-400 space-y-2">
+                                        <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i> Ingreso de fibra al nodo</li>
+                                        <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i> Montado de equipos en rack</li>
+                                        <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-green-500 mt-0.5"></i> Configuración de OLT/Router</li>
+                                    </ul>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resumen -->
+                    <div class="xl:col-span-1">
+                        <div class="bg-gradient-to-b from-[#161521] to-[#0A0912] border border-[#FCBF26]/30 rounded-xl p-6 sticky top-6 shadow-2xl">
+                            <h4 class="text-white font-bold text-sm mb-6 flex items-center gap-2"><i class="ph-fill ph-receipt text-[#FCBF26]"></i> Resumen</h4>
+                            <div class="bg-[#1A1B29] rounded-lg p-4 mb-6 border border-white/5">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-[10px] text-gray-400 uppercase font-bold">Tiempo Estimado</span>
+                                    <span id="res-dias-cal" class="text-white font-mono font-bold">0 Días</span>
+                                </div>
+                                <div class="w-full bg-white/5 rounded-full h-1.5 mb-2"><div id="time-bar" class="bg-[#FCBF26] h-1.5 rounded-full" style="width: 0%"></div></div>
+                                <p class="text-[9px] text-[#FCBF26] text-right font-bold">Podemos ajustar el tiempo a la necesidad del proyecto.</p>
+                            </div>
+                            <div class="text-center mb-6 pt-4 border-t border-white/10">
+                                <span class="block text-gray-500 text-[10px] uppercase tracking-widest mb-1">Inversión Total</span>
+                                <div class="flex items-baseline justify-center gap-2">
+                                    <span class="text-2xl font-bold text-[#FCBF26]">S/</span>
+                                    <span id="imp-total-final" class="text-4xl font-mono font-bold text-[#FCBF26] tracking-tighter">0.00</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <h4 class="text-white font-bold text-sm mb-2 text-center">¿Te parece viable?</h4>
+                                <p class="text-xs text-gray-400 mb-4 leading-relaxed text-center">Sin formularios largos ni esperas. Al hacer clic, te enviaremos la cotización final directamente a tu WhatsApp.</p>
+                                <button onclick="contactarImplementacion()" class="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase text-xs rounded-lg shadow-lg flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-whatsapp-logo text-lg"></i> Solicitar Cotización
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: ACTUALIZACIÓN -->
+            <div id="view-actualizacion" class="view-panel">
+                <header class="mb-8 border-b border-white/5 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <span class="text-[#FCBF26] font-bold tracking-widest uppercase text-xs mb-1 block">Optimización</span>
+                        <h2 class="text-2xl md:text-3xl font-heading font-bold text-white">Actualización y Mantenimiento de Red</h2>
+                        <p class="text-gray-400 text-sm mt-2 max-w-xl">Potenciamos su infraestructura existente analizando oportunidades de mejora y optimización para asegurar que su red evolucione ante las demandas del mercado.</p>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                    <div class="xl:col-span-2 space-y-6">
+                        <div class="bg-[#161521] border border-white/10 rounded-xl p-6">
+                            <h3 class="text-white font-bold text-sm uppercase mb-4 flex items-center gap-2 border-b border-white/5 pb-3">
+                                <i class="ph-bold ph-sliders-horizontal text-[#FCBF26]"></i> Alcance del Trabajo
+                            </h3>
+                            <div class="mb-6 bg-[#0A0912] p-3 rounded-lg border border-white/5">
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" id="act-check-planos" class="w-4 h-4 accent-[#FCBF26] bg-[#161521] border-white/20 rounded cursor-pointer" onchange="calcActualizacion()">
+                                    <div>
+                                        <span class="block text-white text-xs font-bold group-hover:text-[#FCBF26] transition-colors">Cuento con planos / KMZ actuales</span>
+                                        <span class="block text-[10px] text-gray-500">Reduce significativamente el tiempo de relevamiento.</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Fibra Óptica (km)</label><input type="number" id="act-km" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcActualizacion()"></div>
+                                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Hilos Troncal</label><input type="number" id="act-hilos" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcActualizacion()"></div>
+                                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">NAPs (Und)</label><input type="number" id="act-naps" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcActualizacion()"></div>
+                                <div><label class="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Mufas (Und)</label><input type="number" id="act-mufas" placeholder="0" class="w-full bg-[#0A0912] border border-white/10 rounded-lg p-3 text-white font-mono focus:border-[#FCBF26] outline-none" oninput="calcActualizacion()"></div>
+                            </div>
+                        </div>
+
+                        <!-- Entregables -->
+                        <div class="bg-[#161521] border border-white/10 rounded-xl p-6">
+                            <h3 class="text-white font-bold text-sm uppercase mb-4 flex items-center gap-2 border-b border-white/5 pb-3">
+                                <i class="ph-bold ph-list-checks text-[#FCBF26]"></i> Entregables Incluidos
+                            </h3>
+                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Relevamiento de información en campo.</li>
+                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Actualización de planos en CAD - KMZ - ARCGIS.</li>
+                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Actualización y optimización de topología.</li>
+                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Análisis para ampliación de red.</li>
+                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Relación actualizada de postes (expedientes).</li>
+                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Estado de fibra óptica, naps y mufas.</li>
+                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Instalación nuevos clientes.</li>
+                                <li class="flex items-start gap-2 text-xs text-gray-400"><i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5"></i> Mantenimiento de red.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="xl:col-span-1">
+                        <div class="bg-gradient-to-b from-[#161521] to-[#0A0912] border border-[#FCBF26]/30 rounded-xl p-6 sticky top-6 shadow-2xl">
+                             <div class="bg-[#1A1B29] rounded-lg p-4 mb-6 border border-white/5">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-[10px] text-gray-400 uppercase font-bold">Tiempo Estimado</span>
+                                    <span id="act-dias-cal" class="text-white font-mono font-bold">0 Días</span>
+                                </div>
+                                <div class="w-full bg-white/5 rounded-full h-1.5 mb-2"><div id="act-time-bar" class="bg-[#FCBF26] h-1.5 rounded-full" style="width: 0%"></div></div>
+                                <p class="text-[9px] text-[#FCBF26] text-right font-bold">Podemos ajustar el tiempo a la necesidad del proyecto.</p>
+                            </div>
+                            <div class="text-center mb-6 pt-4 border-t border-white/10">
+                                <span class="block text-gray-500 text-[10px] uppercase tracking-widest mb-1">Precio Final</span>
+                                <div class="flex items-baseline justify-center gap-2">
+                                    <span class="text-2xl font-bold text-[#FCBF26]">S/</span>
+                                    <span id="act-total-final" class="text-4xl font-mono font-bold text-[#FCBF26] tracking-tighter">0.00</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <h4 class="text-white font-bold text-sm mb-2 text-center">¿Te parece viable?</h4>
+                                <p class="text-xs text-gray-400 mb-4 leading-relaxed text-center">Sin formularios largos ni esperas. Al hacer clic, te enviaremos la cotización final directamente a tu WhatsApp.</p>
+                                <button onclick="contactarActualizacion()" class="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold uppercase text-xs rounded-lg shadow-lg flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-whatsapp-logo text-lg"></i> Solicitar Cotización
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- MOBILE NAV -->
+        <div class="mobile-nav md:hidden">
+            <div id="mob-nav-home" class="mobile-nav-item active" onclick="switchView('view-home', this, true)"><i class="ph-bold ph-house"></i><span>Inicio</span></div>
+            <div id="mob-nav-diseno" class="mobile-nav-item" onclick="switchView('view-diseno', this, true)"><i class="ph-bold ph-pencil-ruler"></i><span>Diseño</span></div>
+            <div id="mob-nav-exp" class="mobile-nav-item" onclick="switchView('view-expediente', this, true)"><i class="ph-bold ph-file-text"></i><span>Exp.</span></div>
+            <div id="mob-nav-imp" class="mobile-nav-item" onclick="switchView('view-implementacion', this, true)"><i class="ph-bold ph-wrench"></i><span>Impl.</span></div>
+            <div id="mob-nav-act" class="mobile-nav-item" onclick="switchView('view-actualizacion', this, true)"><i class="ph-bold ph-arrows-clockwise"></i><span>Act.</span></div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPTS LÓGICOS -->
+    <script>
+        // --- 1. FONDO ANIMADO ---
+        (function() {
+            const bgCanvas = document.getElementById('bg-canvas');
+            let ctx, w, h, snakes = [];
+            class Snake {
+                constructor() { this.reset(); }
+                reset() { 
+                    this.x = Math.random() * w; this.y = Math.random() * h; 
+                    this.speed = 2 + Math.random() * 2; 
+                    this.angle = Math.floor(Math.random()*4) * (Math.PI/2);
+                    this.history = []; this.life = 100 + Math.random() * 100;
+                }
+                update() {
+                    this.life--; if(this.life <= 0) this.reset();
+                    this.history.push({x:this.x, y:this.y});
+                    if(this.history.length > 20) this.history.shift();
+                    this.x += Math.cos(this.angle) * this.speed;
+                    this.y += Math.sin(this.angle) * this.speed;
+                    if(this.x<0||this.x>w||this.y<0||this.y>h) this.reset();
+                    if(Math.random() < 0.02) this.angle += (Math.random()<0.5?1:-1)*(Math.PI/2);
+                }
+                draw() {
+                    if(this.history.length<2) return;
+                    ctx.beginPath();
+                    ctx.moveTo(this.history[0].x, this.history[0].y);
+                    for(let p of this.history) ctx.lineTo(p.x, p.y);
+                    ctx.strokeStyle = 'rgba(252, 191, 38, 0.4)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+            function initBg() {
+                if(!bgCanvas) return;
+                w = bgCanvas.width = window.innerWidth;
+                h = bgCanvas.height = window.innerHeight;
+                ctx = bgCanvas.getContext('2d');
+                snakes = Array.from({length: 30}, () => new Snake()); 
+                animateBg();
+            }
+            function animateBg() {
+                if(!ctx) return;
+                ctx.clearRect(0,0,w,h);
+                snakes.forEach(s => { s.update(); s.draw(); });
+                requestAnimationFrame(animateBg);
+            }
+            window.addEventListener('resize', () => { if(bgCanvas) { w = bgCanvas.width = window.innerWidth; h = bgCanvas.height = window.innerHeight; } });
+            initBg();
+        })();
+
+        // --- 2. NAVEGACIÓN ---
+        function switchView(viewId, btnElement) {
+            document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active-view'));
+            document.querySelectorAll('.menu-item, .mobile-nav-item').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(viewId).classList.add('active-view');
+            
+            if (btnElement) {
+                btnElement.classList.add('active');
+                const id = btnElement.id;
+                if(id.startsWith('nav-')) {
+                    const mobId = 'mob-' + id;
+                    const mobEl = document.getElementById(mobId);
+                    if(mobEl) mobEl.classList.add('active');
+                } else if(id.startsWith('mob-nav-')) {
+                    const deskId = id.replace('mob-', '');
+                    const deskEl = document.getElementById(deskId);
+                    if(deskEl) deskEl.classList.add('active');
+                }
+            }
+            
+            const content = document.querySelector('.main-content');
+            if(content) content.scrollTop = 0;
+
+            if (viewId === 'view-diseno' && typeof map !== 'undefined') setTimeout(() => map.invalidateSize(), 300);
+            if (viewId === 'view-expediente' && typeof wizMap !== 'undefined') setTimeout(() => wizMap.invalidateSize(), 300);
+        }
+
+        // --- 3. LÓGICA CALCULADORA DISEÑO (GPON) ---
+        const pricingData = [
+            { a: 0.5, s: 550, i: 670, l: 275 }, { a: 1.0, s: 787, i: 908, l: 325 }, { a: 1.5, s: 1021, i: 1201, l: 375 },
+            { a: 2.0, s: 1183, i: 1423, l: 375 }, { a: 2.5, s: 1409, i: 1710, l: 425 }, { a: 3.0, s: 1633, i: 1994, l: 475 },
+            { a: 3.5, s: 1956, i: 2377, l: 600 }, { a: 4.0, s: 2104, i: 2585, l: 600 }, { a: 4.5, s: 2386, i: 2927, l: 700 },
+            { a: 5.0, s: 2527, i: 3128, l: 700 }, { a: 5.5, s: 2664, i: 3326, l: 700 }, { a: 6.0, s: 2936, i: 3658, l: 800 },
+            { a: 6.5, s: 3307, i: 4089, l: 975 }, { a: 7.0, s: 3434, i: 4276, l: 975 }, { a: 7.5, s: 3558, i: 4460, l: 975 },
+            { a: 8.0, s: 3678, i: 4641, l: 975 }, { a: 8.5, s: 4001, i: 5024, l: 1125 }, { a: 9.0, s: 4287, i: 5369, l: 1250 },
+            { a: 9.5, s: 4397, i: 5540, l: 1250 }, { a: 10.0, s: 4503, i: 5706, l: 1250 }, { a: 10.5, s: 4606, i: 5870, l: 1250 },
+            { a: 11.0, s: 4706, i: 6029, l: 1250 }, { a: 11.5, s: 5077, i: 6461, l: 1450 }, { a: 12.0, s: 5273, i: 6717, l: 1525 },
+            { a: 12.5, s: 5363, i: 6866, l: 1525 }, { a: 13.0, s: 5448, i: 7013, l: 1525 }, { a: 13.5, s: 5531, i: 7155, l: 1525 },
+            { a: 14.0, s: 5610, i: 7294, l: 1525 }, { a: 14.5, s: 6029, i: 7774, l: 1775 }, { a: 15.0, s: 6136, i: 7941, l: 1800 }
+        ];
+
+        function updateUIState() {
+            const area = document.getElementById('area-input').value;
+            if(area && parseFloat(area) > 0) calcularPresupuesto();
+        }
+
+        function manualCalculate() {
+            const area = document.getElementById('area-input').value;
+            if(!area) {
+                 const input = document.getElementById('area-input');
+                 input.classList.add('border-red-500');
+                 setTimeout(() => input.classList.remove('border-red-500'), 1000);
+                 return;
+            }
+            calcularPresupuesto();
+        }
+
+        function calcularPresupuesto() {
+            const areaInput = document.getElementById('area-input').value;
+            const tipo = document.querySelector('input[name="tipo_diseno"]:checked').value;
+            const hasLevantamiento = document.getElementById('info-levantada').checked;
+            const resultBox = document.getElementById('calc-result-box');
+            const display = document.getElementById('calc-price-display');
+            const warning = document.getElementById('large-project-warning');
+
+            let area = parseFloat(areaInput);
+            if (!area || area <= 0) return;
+
+            resultBox.classList.remove('hidden');
+            resultBox.classList.add('flex');
+
+            if (area > 15) { 
+                warning.classList.remove('hidden');
+                warning.classList.add('flex');
+                display.innerHTML = "Cotizar"; 
+            } else {
+                warning.classList.add('hidden');
+                warning.classList.remove('flex');
+                let lookupArea = Math.round(area * 2) / 2;
+                if (lookupArea < 0.5) lookupArea = 0.5;
+                let row = pricingData.find(d => d.a === lookupArea);
+                if (!row) { row = pricingData.find(d => d.a > lookupArea); }
+                if (!row) row = pricingData[pricingData.length - 1];
+                let price = (tipo === 'estandar') ? row.s : row.i;
+                if (hasLevantamiento) price -= row.l;
+                display.innerHTML = `$${price.toLocaleString()}`;
+            }
+        }
+
+        function contactarAsesor() {
+            const area = document.getElementById('area-input').value || "0";
+            const lugarInput = document.getElementById('lugar-input');
+            const lugar = lugarInput.value.trim();
+            if(!lugar) {
+                lugarInput.classList.add('border-red-500'); lugarInput.focus();
+                setTimeout(() => lugarInput.classList.remove('border-red-500'), 1000);
+                alert("Por favor, ingrese la ubicación."); return;
+            }
+            const tipo = document.querySelector('input[name="tipo_diseno"]:checked').value;
+            const levantamiento = document.getElementById('info-levantada').checked ? "Sí" : "No";
+            const tipoTexto = tipo === 'estandar' ? "Diseño Estándar" : "Diseño Integral";
+            const precio = document.getElementById('calc-price-display').innerText;
+            let mapLink = "", areaNote = "";
+            if (polygonPoints.length > 0) {
+                let latSum = 0, lngSum = 0;
+                polygonPoints.forEach(p => { latSum += p.lat; lngSum += p.lng; });
+                const lat = (latSum/polygonPoints.length).toFixed(6);
+                const lng = (lngSum/polygonPoints.length).toFixed(6);
+                mapLink = `\n\n📍 *Ubicación Digitalizada:*\nhttps://maps.google.com/?q=${lat},${lng}`;
+                areaNote = " (Calculado con Mapa)";
+            }
+            const finalMsg = `Hola EVA, deseo cotización.\n\n📋 *RESUMEN:*\n• *Servicio:* ${tipoTexto}\n• *Levantamiento:* ${levantamiento}\n• *Ubicación:* ${lugar}\n• *Área:* ${area} km²${areaNote}\n\n💰 *Referencia:* ${precio}${mapLink}`;
+            window.open(`https://wa.me/51914754413?text=${encodeURIComponent(finalMsg)}`, '_blank');
+        }
+
+        // --- 4. MAPA DISEÑO ---
+        let map, polygonPoints = [], polygonLayer, markers = [], isDrawing = false, mapInitialized = false;
+        function toggleMap() {
+            const wrapper = document.getElementById('map-wrapper');
+            wrapper.classList.toggle('hidden');
+            if (!wrapper.classList.contains('hidden') && !mapInitialized) { initMap(); mapInitialized = true; }
+        }
+        function initMap() {
+            if (!map) {
+                map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-16.409, -71.537], 13);
+                L.control.zoom({ position: 'bottomright' }).addTo(map);
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' }).addTo(map);
+                document.getElementById('map-container').style.cursor = 'crosshair';
+                isDrawing = true;
+                map.on('click', onMapClick); map.on('contextmenu', undoLastPoint); map.on('dblclick', finishPolygon);
+            }
+        }
+        function onMapClick(e) {
+            if (!isDrawing) return;
+            polygonPoints.push(e.latlng);
+            const marker = L.circleMarker(e.latlng, { radius: 4, color: '#FCBF26', fillColor: '#fff', fillOpacity: 1 }).addTo(map);
+            markers.push(marker);
+            drawPolygon();
+        }
+        function drawPolygon() {
+            if (polygonLayer) map.removeLayer(polygonLayer);
+            if (polygonPoints.length > 0) {
+                polygonLayer = L.polygon(polygonPoints, { color: '#FCBF26', weight: 2, fillColor: '#FCBF26', fillOpacity: 0.2, dashArray: isDrawing ? '5, 5' : null }).addTo(map);
+            }
+            if (polygonPoints.length > 2) calculateArea(polygonPoints);
+        }
+        function undoLastPoint() {
+            if (polygonPoints.length > 0) {
+                polygonPoints.pop(); const lastMarker = markers.pop(); if (lastMarker) map.removeLayer(lastMarker);
+                drawPolygon();
+                if (polygonPoints.length < 3) document.getElementById('area-input').value = ''; else calculateArea(polygonPoints);
+                if (!isDrawing) { isDrawing = true; document.getElementById('map-container').style.cursor = 'crosshair'; }
+            }
+        }
+        function clearMap() {
+            polygonPoints = []; if (polygonLayer) map.removeLayer(polygonLayer);
+            markers.forEach(m => map.removeLayer(m)); markers = [];
+            document.getElementById('area-input').value = ''; isDrawing = true; document.getElementById('map-container').style.cursor = 'crosshair';
+        }
+        function finishPolygon() {
+            if (polygonPoints.length < 3) return;
+            isDrawing = false; document.getElementById('map-container').style.cursor = 'grab';
+            if (polygonLayer) map.removeLayer(polygonLayer);
+            polygonLayer = L.polygon(polygonPoints, { color: '#FCBF26', weight: 2, fillColor: '#FCBF26', fillOpacity: 0.4 }).addTo(map);
+            map.fitBounds(polygonLayer.getBounds(), { padding: [20, 20] });
+        }
+        function toRadians(deg) { return deg * Math.PI / 180; }
+        function calculateArea(latLngs) {
+            const earthRadius = 6378137; let area = 0;
+            if (latLngs.length > 2) {
+                for (let i = 0; i < latLngs.length; i++) {
+                    let p1 = latLngs[i], p2 = latLngs[(i + 1) % latLngs.length];
+                    area += toRadians(p2.lng - p1.lng) * (2 + Math.sin(toRadians(p1.lat)) + Math.sin(toRadians(p2.lat)));
+                }
+                area = Math.abs(area * earthRadius * earthRadius / 2.0);
+            }
+            const areaKm2 = (area / 1000000).toFixed(2);
+            document.getElementById('area-input').value = areaKm2;
+            if(parseFloat(areaKm2) > 0) calcularPresupuesto();
+        }
+
+        // =======================================================
+        // --- 5. LÓGICA ASISTENTE EXPEDIENTES (WIZARD) ---
+        // =======================================================
+        
+        let wizardData = {
+            requisitos: null,
+            info_completa: null,
+            postes: 0,
+            mecanico: null,
+            firma: null
+        };
+
+        function nextStep(n) {
+            if(n === 2 && wizardData.requisitos === null) return;
+            if(n === 3 && wizardData.info_completa === null) return;
+            
+            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active-step'));
+            document.getElementById(`step-${n}`).classList.add('active-step');
+            
+            updateProgressBar(n);
+            if(n === 3) setTimeout(() => { if(wizMap) wizMap.invalidateSize(); }, 200);
+        }
+
+        function prevStep(n) {
+            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active-step'));
+            document.getElementById(`step-${n}`).classList.add('active-step');
+            updateProgressBar(n);
+        }
+
+        function setWizardData(key, value) { wizardData[key] = value; }
+
+        function toggleWarningReq() {
+            const btn = document.getElementById('btn-no-req');
+            const warn = document.getElementById('warning-req');
+            
+            if (warn.classList.contains('hidden')) {
+                btn.classList.add('bg-red-500/10', 'border-red-400');
+                warn.classList.remove('hidden');
+                setWizardData('requisitos', false);
+            } else {
+                btn.classList.remove('bg-red-500/10', 'border-red-400');
+                warn.classList.add('hidden');
+            }
+        }
+
+        function updateProgressBar(n) {
+            const pct = ((n - 1) / 4) * 100;
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+            
+            for(let i=1; i<=5; i++) {
+                const dot = document.getElementById(`step-dot-${i}`);
+                if (i <= n) {
+                    dot.classList.remove('bg-[#161521]', 'text-gray-500', 'border-white/20');
+                    dot.classList.add('bg-[#FCBF26]', 'text-[#100F1D]', 'border-[#FCBF26]');
+                } else {
+                    dot.classList.add('bg-[#161521]', 'text-gray-500', 'border-white/20');
+                    dot.classList.remove('bg-[#FCBF26]', 'text-[#100F1D]', 'border-[#FCBF26]');
+                }
+            }
+        }
+
+        // Paso 3 Lógica
+        let wizMap, wizPolylines = [], wizMarkers = [], activePolyline = null, wizMode = 'input';
+
+        function toggleWizPostesMode() {
+            const val = document.querySelector('input[name="wiz_postes_mode"]:checked').value;
+            wizMode = val;
+            if(val === 'input') {
+                document.getElementById('wiz-postes-input').classList.remove('hidden');
+                document.getElementById('wiz-postes-map').classList.add('hidden');
+            } else {
+                document.getElementById('wiz-postes-input').classList.add('hidden');
+                document.getElementById('wiz-postes-map').classList.remove('hidden');
+                setTimeout(initWizMap, 100);
+            }
+        }
+
+        function initWizMap() {
+            if(!wizMap) {
+                wizMap = L.map('wiz-map-container', { zoomControl: false, doubleClickZoom: false }).setView([-16.409, -71.537], 13);
+                L.control.zoom({ position: 'bottomright' }).addTo(wizMap);
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' }).addTo(wizMap);
+                document.getElementById('wiz-map-container').style.cursor = 'crosshair';
+                wizMap.on('click', onWizMapClick);
+                wizMap.on('contextmenu', wizUndo);
+            }
+            wizMap.invalidateSize();
+        }
+
+        function onWizMapClick(e) {
+            if (!activePolyline) {
+                activePolyline = L.polyline([], { color: '#FCBF26', weight: 4 }).addTo(wizMap);
+                wizPolylines.push(activePolyline);
+            }
+            activePolyline.addLatLng(e.latlng);
+            const m = L.circleMarker(e.latlng, { radius: 3, color: '#FCBF26', fillColor: '#fff', fillOpacity: 1 }).addTo(wizMap);
+            wizMarkers.push(m);
+            calculateWizMapPostes();
+        }
+
+        function wizFinishLine() { activePolyline = null; }
+
+        function wizUndo() {
+            if (wizMarkers.length > 0) {
+                const lastMarker = wizMarkers.pop();
+                wizMap.removeLayer(lastMarker);
+            }
+            let targetLine = activePolyline;
+            if (!targetLine && wizPolylines.length > 0) { targetLine = wizPolylines[wizPolylines.length - 1]; }
+
+            if (targetLine) {
+                const latlngs = targetLine.getLatLngs();
+                if (latlngs.length > 0) {
+                    latlngs.pop();
+                    targetLine.setLatLngs(latlngs);
+                    if (latlngs.length === 0) {
+                        wizMap.removeLayer(targetLine);
+                        wizPolylines = wizPolylines.filter(l => l !== targetLine);
+                        activePolyline = null;
+                    } else {
+                        activePolyline = targetLine;
+                    }
+                }
+            }
+            calculateWizMapPostes();
+        }
+
+        function wizClear() {
+            wizPolylines.forEach(p => wizMap.removeLayer(p));
+            wizMarkers.forEach(m => wizMap.removeLayer(m));
+            wizPolylines = [];
+            wizMarkers = [];
+            activePolyline = null;
+            document.getElementById('wiz-map-result').innerHTML = "0";
+        }
+
+        function calculateWizMapPostes() {
+            let totalMeters = 0;
+            wizPolylines.forEach(p => {
+                const latlngs = p.getLatLngs();
+                for (let i = 0; i < latlngs.length - 1; i++) {
+                    totalMeters += latlngs[i].distanceTo(latlngs[i+1]);
+                }
+            });
+            const count = Math.ceil(totalMeters / 35);
+            document.getElementById('wiz-map-result').innerHTML = count;
+            wizardData.postes = count;
+        }
+
+        function validatePostesAndNext() {
+            if (wizMode === 'input') {
+                const val = document.getElementById('wiz-num-postes').value;
+                if (!val || val <= 0) { 
+                    const inp = document.getElementById('wiz-num-postes');
+                    inp.classList.add('border-red-500'); setTimeout(()=>inp.classList.remove('border-red-500'), 1000);
+                    return; 
+                }
+                wizardData.postes = parseInt(val);
+            } else {
+                if (wizardData.postes <= 0) { alert("Dibuje al menos una ruta en el mapa"); return; }
+            }
+            nextStep(4);
+        }
+
+        function showResult() {
+            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active-step'));
+            document.getElementById('wizard-result').classList.add('active-step');
+            
+            const PRICE_BASE_MIN = 500;
+            const PRICE_PER_POSTE = 5.2;
+            const PRICE_FIRMA = 500;
+            const PRICE_MECANICO = 500;
+            const COSTO_DIA_CAMPO = 220;
+            const KM_PER_DAY = 7;
+            const METERS_PER_POSTE = 35;
+
+            let costoPostesCalc = wizardData.postes * PRICE_PER_POSTE;
+            let costoExpediente = Math.max(PRICE_BASE_MIN, costoPostesCalc);
+
+            let costoLevantamiento = 0;
+            if (wizardData.info_completa === false) {
+                const totalKm = (wizardData.postes * METERS_PER_POSTE) / 1000;
+                const diasCampo = Math.ceil(totalKm / KM_PER_DAY);
+                costoLevantamiento = (diasCampo || 1) * COSTO_DIA_CAMPO;
+            }
+
+            let costoMecanico = 0;
+            if (wizardData.mecanico === true) {
+                if (costoExpediente <= 2300) { costoMecanico = PRICE_MECANICO; }
+            }
+
+            let costoFirma = wizardData.firma === true ? PRICE_FIRMA : 0;
+
+            const total = costoExpediente + costoLevantamiento + costoMecanico + costoFirma;
+            document.getElementById('wiz-total-display').innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            const listEl = document.getElementById('wiz-entregables-list');
+            let items = [];
+            
+            if(wizardData.info_completa === false) items.push("Levantamiento en campo");
+            items.push("Postes con coordenadas UTM");
+            items.push("Memoria descriptiva");
+            items.push("Especificaciones técnicas");
+            items.push("Detalle de armados");
+            items.push("Planos de tendido");
+            if(wizardData.mecanico === true) items.push("Cálculo esfuerzo mecánico");
+            if(wizardData.firma === true) items.push("Firma Ing. Colegiado");
+            items.push("Entrega física");
+
+            listEl.innerHTML = items.map(item => `
+                <li class="flex items-start gap-2 text-[11px] text-gray-400">
+                    <i class="ph-fill ph-check-circle text-[#FCBF26] mt-0.5 shrink-0"></i> ${item}
+                </li>
+            `).join('');
+        }
+
+        function resetWizard() {
+            wizardData = { requisitos: null, info_completa: null, postes: 0, mecanico: null, firma: null };
+            document.getElementById('wiz-num-postes').value = '';
+            document.getElementById('btn-no-req').classList.remove('bg-red-500/10', 'border-red-400');
+            document.getElementById('warning-req').classList.add('hidden');
+            wizClear();
+            
+            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active-step'));
+            document.getElementById('step-1').classList.add('active-step');
+            updateProgressBar(1);
+        }
+
+        function contactarWizard() {
+            const precio = document.getElementById('wiz-total-display').innerText;
+            const msg = `Hola EVA, deseo cotizar *Expedientes*.\n\n📋 *RESUMEN:*\n` +
+                        `• Requisitos: ${wizardData.requisitos ? 'Sí' : 'No'}\n` +
+                        `• Info Campo: ${wizardData.info_completa ? 'Sí' : 'No'}\n` +
+                        `• Postes: ${wizardData.postes}\n` +
+                        `• Mecánico: ${wizardData.mecanico ? 'Sí' : 'No'}\n` +
+                        `• Firma: ${wizardData.firma ? 'Sí' : 'No'}\n` +
+                        `\n💰 *Referencia:* S/ ${precio}`;
+            window.open(`https://wa.me/51914754413?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // --- 6. CALCULADORA IMPLEMENTACIÓN ---
+        function toggleImpNodoInput() {
+            const isChecked = document.getElementById('imp-check-nodo').checked;
+            const container = document.getElementById('imp-nodo-container');
+            if (isChecked) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('imp-nodos').value = '';
+                calcImplementacion();
+            }
+        }
+
+        function calcImplementacion() {
+            const km = parseFloat(document.getElementById('imp-km').value) || 0;
+            const naps = parseFloat(document.getElementById('imp-naps').value) || 0;
+            const mufas = parseFloat(document.getElementById('imp-mufas').value) || 0;
+            let nodos = 0;
+            if (document.getElementById('imp-check-nodo').checked) {
+                nodos = parseFloat(document.getElementById('imp-nodos').value) || 0;
+            }
+
+            const PROD_KM = 1.2;
+            const PROD_NAP = 6;
+            const PROD_MUFA = 2;
+
+            const workDaysNeeded = (km / PROD_KM) + (naps / PROD_NAP) + (mufas / PROD_MUFA);
+            
+            let calendarDays = 0;
+            let sundays = 0;
+
+            if (workDaysNeeded > 0) {
+                const fullWeeks = Math.floor(workDaysNeeded / 6);
+                const remainingWork = workDaysNeeded % 6;
+                calendarDays += fullWeeks * 7;
+                sundays += fullWeeks;
+                if (remainingWork > 0) { calendarDays += Math.ceil(remainingWork); }
+            }
+
+            const PER_FOOD = 40;
+            const PER_LODGE = 50;
+            const PER_SALARY = 100;
+            const TEAM_SIZE = 5;
+            const TEAM_MOBILITY = 30;
+
+            const dailyCostPerson = PER_FOOD + PER_LODGE + PER_SALARY;
+            const totalCostPersonnel = calendarDays * TEAM_SIZE * dailyCostPerson;
+            const mobilityDays = calendarDays - sundays;
+            const totalCostMobility = mobilityDays * TEAM_MOBILITY;
+
+            const COST_MOUNT = 250;
+            const COST_CONFIG = 2000;
+            const totalCostPI = nodos * (COST_MOUNT + COST_CONFIG);
+
+            const totalOp = totalCostPersonnel + totalCostMobility + totalCostPI;
+            const finalPrice = totalOp * 1.35;
+
+            document.getElementById('res-dias-cal').innerText = `${calendarDays} Días`;
+            const barPct = Math.min((calendarDays / 60) * 100, 100);
+            document.getElementById('time-bar').style.width = `${barPct}%`;
+            
+            document.getElementById('imp-total-final').innerText = finalPrice.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        function contactarImplementacion() {
+            const finalPrice = document.getElementById('imp-total-final').innerText;
+            const km = document.getElementById('imp-km').value || 0;
+            const naps = document.getElementById('imp-naps').value || 0;
+            const mufas = document.getElementById('imp-mufas').value || 0;
+            const nodos = document.getElementById('imp-nodos').value || 0;
+            const days = document.getElementById('res-dias-cal').innerText;
+
+            let msg = `Hola EVA, cotización *Implementación*.\n\n📋 *ALCANCE:*\n` +
+                        `• Fibra: ${km} km\n` +
+                        `• NAPs: ${naps} und\n` +
+                        `• Mufas: ${mufas} und\n`;
+            if (nodos > 0) { msg += `• Nodos: ${nodos} und\n`; }
+            msg += `• Tiempo: ${days}\n` +
+                   `\n💰 *Inversión:* S/ ${finalPrice}`;
+            window.open(`https://wa.me/51914754413?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // --- 7. CALCULADORA ACTUALIZACIÓN ---
+        function calcActualizacion() {
+            const km = parseFloat(document.getElementById('act-km').value) || 0;
+            const naps = parseFloat(document.getElementById('act-naps').value) || 0;
+            const mufas = parseFloat(document.getElementById('act-mufas').value) || 0;
+            const hilos = parseFloat(document.getElementById('act-hilos').value) || 0;
+            
+            const hasPlanos = document.getElementById('act-check-planos').checked;
+            const DAYS_PER_KM = hasPlanos ? 0.3 : 1.8; 
+            const PROD_NAP = 8;
+            const PROD_MUFA = 4;
+            const PROD_HILOS = 24;
+
+            const workDaysNeeded = (km * DAYS_PER_KM) + (naps / PROD_NAP) + (mufas / PROD_MUFA) + (hilos / PROD_HILOS);
+            
+            let calendarDays = 0;
+            let sundays = 0;
+
+            if (workDaysNeeded > 0) {
+                const fullWeeks = Math.floor(workDaysNeeded / 6);
+                const remainingWork = workDaysNeeded % 6;
+                calendarDays += fullWeeks * 7;
+                sundays += fullWeeks;
+                if (remainingWork > 0) { calendarDays += Math.ceil(remainingWork); }
+            }
+
+            const PER_FOOD = 40;
+            const PER_LODGE = 50;
+            const PER_SALARY = 100;
+            const TEAM_SIZE = 5;
+            const TEAM_MOBILITY = 30; 
+
+            const dailyCostPerson = PER_FOOD + PER_LODGE + PER_SALARY;
+            const totalCostPersonnel = calendarDays * TEAM_SIZE * dailyCostPerson;
+            const mobilityDays = calendarDays - sundays;
+            const totalCostMobility = mobilityDays * TEAM_MOBILITY;
+
+            const totalOp = totalCostPersonnel + totalCostMobility;
+            const finalPrice = totalOp * 1.35;
+
+            document.getElementById('act-dias-cal').innerText = `${calendarDays} Días`;
+            const barPct = Math.min((calendarDays / 60) * 100, 100);
+            document.getElementById('act-time-bar').style.width = `${barPct}%`;
+            document.getElementById('act-total-final').innerText = finalPrice.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        function contactarActualizacion() {
+            const finalPrice = document.getElementById('act-total-final').innerText;
+            const km = document.getElementById('act-km').value || 0;
+            const naps = document.getElementById('act-naps').value || 0;
+            const mufas = document.getElementById('act-mufas').value || 0;
+            const hilos = document.getElementById('act-hilos').value || 0;
+            const days = document.getElementById('act-dias-cal').innerText;
+            const hasPlanos = document.getElementById('act-check-planos').checked ? "Sí" : "No";
+
+            const msg = `Hola EVA, cotización *Actualización*.\n\n📋 *ALCANCE:*\n` +
+                        `• Planos: ${hasPlanos}\n` +
+                        `• Fibra: ${km} km\n` +
+                        `• Hilos: ${hilos} und\n` +
+                        `• NAPs: ${naps} und\n` +
+                        `• Mufas: ${mufas} und\n` +
+                        `• Tiempo: ${days}\n` +
+                        `\n💰 *Inversión:* S/ ${finalPrice}`;
+            window.open(`https://wa.me/51914754413?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+    </script>
+</body>
+</html>
